@@ -1,2 +1,3 @@
 User-agent: *
 Allow: /
+Sitemap: https://financial-park-panama.netlify.app/sitemap.xml
