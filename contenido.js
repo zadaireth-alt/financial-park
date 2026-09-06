@@ -9,6 +9,10 @@
    1. Guarda la imagen en la carpeta  img/
    2. Escribe su nombre en el campo "foto"  →  foto: "img/of-1204.jpg"
    3. Si dejas  foto: null  aparece un placeholder elegante.
+
+   CÓMO AGREGAR VARIAS FOTOS A UNA OFICINA (carrusel):
+   Usa el campo "fotos": ["img/foto-1.jpg", "img/foto-2.jpg", ...]
+   Si "fotos" no existe, se usa solo el campo "foto".
    ============================================================= */
 
 const CONTENIDO = {
@@ -37,9 +41,11 @@ const CONTENIDO = {
     bajada: "En el corazón financiero de una de las zonas más exclusivas de la ciudad. Oficinas de 94 a 1,022 m², a pasos de hoteles, restaurantes y todo lo que su operación necesita.",
     ctaPrimario: { texto: "Ver oficinas disponibles", href: "#oficinas" },
     ctaSecundario: { texto: "Agendar una visita", href: "#contacto" },
-    // Cambia esta foto por el video o la imagen final del edificio
-    imagen: "img/oficina-vista.jpg",
-    imagenMovil: "img/torre-atardecer.jpg"
+    // Video de fondo del hero. Si "video" queda en null, se usa solo la imagen.
+    video: "video/hero.mp4",
+    // Imagen de respaldo (se ve mientras carga el video, y si el navegador no puede reproducirlo)
+    imagen: "img/hero-poster.jpg",
+    imagenMovil: "img/hero-poster.jpg"
   },
 
   /* ---------- BANDAS A SANGRE (fotos de borde a borde) ---------- */
@@ -63,15 +69,48 @@ const CONTENIDO = {
   /* =============================================================
      OFICINAS
      -------------------------------------------------------------
-     ⚠️ LAS FICHAS DE ABAJO SON LA ESTRUCTURA DE EJEMPLO.
-     Reemplaza los datos por los reales cuando el cliente los pase.
+     ⚠️ Salvo la primera (marcada real: true), las fichas de abajo
+     son la estructura de EJEMPLO. Reemplaza los datos por los
+     reales cuando el cliente los pase.
      Para agregar una oficina: copia un bloque { ... } completo.
      Para quitarla: bórralo.
 
      estado:  "disponible" | "reservada" | "alquilada"
-     tipo:    "Llave en mano" | "Amoblada" | "Obra gris"
+     tipo:    "Llave en mano" | "Amoblada" | "Obra gris" | "Por confirmar"
+     real:    true → oficina real confirmada (se le pone una etiqueta "Real")
+     fotos:   arreglo opcional de varias fotos (carrusel). Si no está, se usa "foto".
      ============================================================= */
   oficinas: [
+    {
+      codigo: "05B",
+      torre: null,
+      piso: 5,
+      m2: 234,
+      altura: null,
+      estado: "disponible",
+      tipo: "Por confirmar",
+      vista: null,
+      descripcion: "Oficina real disponible en el piso 5, de 234 m². Estas fotos y el plano son del espacio real — el resto de la ficha (tipo de entrega, altura, características) se confirma con el cliente.",
+      caracteristicas: [],
+      real: true,
+      foto: "img/of-05b-01.jpg",
+      fotos: [
+        "img/of-05b-01.jpg",
+        "img/of-05b-02.jpg",
+        "img/of-05b-03.jpg",
+        "img/of-05b-04.jpg",
+        "img/of-05b-05.jpg",
+        "img/of-05b-06.jpg",
+        "img/of-05b-07.jpg",
+        "img/of-05b-08.jpg",
+        "img/of-05b-09.jpg",
+        "img/of-05b-10.jpg",
+        "img/of-05b-11.jpg",
+        "img/of-05b-12.jpg",
+        "img/of-05b-13.jpg"
+      ],
+      plano: null
+    },
     {
       codigo: "OF-1204",
       torre: "Torre A",
@@ -83,7 +122,7 @@ const CONTENIDO = {
       vista: "Vista al mar",
       descripcion: "Planta completa con recepción, cuatro privados y sala de juntas. Entregada lista para instalar la operación.",
       caracteristicas: ["4 privados", "Sala de juntas", "Recepción", "Cocineta"],
-      foto: null,
+      foto: "img/referencia-1.jpg",
       plano: null
     },
     {
@@ -97,7 +136,7 @@ const CONTENIDO = {
       vista: "Vista a la ciudad",
       descripcion: "Espacio abierto con dos privados, cocineta y área de espera propia. Ideal para equipos de 18 a 22 personas.",
       caracteristicas: ["2 privados", "Área abierta", "Cocineta", "Área de espera"],
-      foto: null,
+      foto: "img/referencia-2.jpg",
       plano: null
     },
     {
@@ -111,7 +150,7 @@ const CONTENIDO = {
       vista: "Vista panorámica",
       descripcion: "Penthouse corporativo con terraza privada y acabados premium. Doble altura en el acceso.",
       caracteristicas: ["Terraza privada", "6 privados", "Sala de juntas", "Acabados premium"],
-      foto: null,
+      foto: "img/referencia-3.jpg",
       plano: null
     },
     {
@@ -125,7 +164,7 @@ const CONTENIDO = {
       vista: "Vista interior",
       descripcion: "La opción de entrada: amoblada, con divisiones y todos los servicios listos para operar desde el primer día.",
       caracteristicas: ["1 privado", "Amoblada", "Divisiones incluidas", "Lista para operar"],
-      foto: null,
+      foto: "img/referencia-4.jpg",
       plano: null
     },
     {
@@ -139,7 +178,7 @@ const CONTENIDO = {
       vista: "Vista al mar",
       descripcion: "Media planta para diseñar a la medida. Luz natural en todo el perímetro y capacidad para más de 70 puestos.",
       caracteristicas: ["Planta libre", "Luz natural perimetral", "+70 puestos", "A la medida"],
-      foto: null,
+      foto: "img/referencia-5.jpg",
       plano: null
     },
     {
@@ -153,7 +192,7 @@ const CONTENIDO = {
       vista: "Vista 360°",
       descripcion: "Planta completa, la mayor disponible en el edificio. Pensada para casas matrices y operaciones regionales.",
       caracteristicas: ["Planta completa", "Vista 360°", "Acceso privado", "Casa matriz"],
-      foto: null,
+      foto: "img/referencia-6.jpg",
       plano: null
     }
   ],
@@ -196,7 +235,7 @@ const CONTENIDO = {
       "Sin período de adecuación",
       "Metrajes de 94 a 350 m²"
     ],
-    imagen: "img/lobby-globo.jpg"
+    imagen: "img/llave-en-mano.jpg"
   },
 
   /* ---------- UBICACIÓN ---------- */
@@ -222,7 +261,9 @@ const CONTENIDO = {
       { valor: "360,000 m²", etiqueta: "Desarrollados" },     // ⚠️ confirmar
       { valor: "160,000 m²", etiqueta: "Bajo construcción" }  // ⚠️ confirmar
     ],
-    servicios: "Oficinas · Residencial · Centros comerciales · Cines · Hotelería"
+    servicios: "Oficinas · Residencial · Centros comerciales · Cines · Hotelería",
+    // Fotos del desarrollador (opcional). Deja [] para no mostrar nada.
+    fotos: ["img/desarrollo-bahia-1.jpg", "img/desarrollo-bahia-2.jpg"]
   },
 
   /* ---------- GALERÍA ----------
