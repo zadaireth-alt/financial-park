@@ -40,10 +40,13 @@
 
 <!-- ═══════════ 01 · HERO ═══════════ -->
 <section class="hero">
-  <picture class="hero-media">
-    <source media="(max-width: 760px)" data-slot="hero-img-movil" srcset="">
-    <img data-slot="hero-img" src="" alt="Financial Park, Costa del Este" fetchpriority="high">
-  </picture>
+  <div class="hero-media">
+    <video class="hero-video" data-slot="hero-video" autoplay muted loop playsinline></video>
+    <picture>
+      <source media="(max-width: 760px)" data-slot="hero-img-movil" srcset="">
+      <img data-slot="hero-img" src="" alt="Financial Park, Costa del Este" fetchpriority="high">
+    </picture>
+  </div>
   <div class="hero-overlay"></div>
 
   <div class="wrap hero-content">
@@ -195,6 +198,7 @@
     </div>
 
     <div class="stats" data-slot="dev-stats"></div>
+    <div class="dev-photos" data-slot="dev-fotos"></div>
     <p class="services" data-slot="dev-servicios"></p>
   </div>
 </section>
