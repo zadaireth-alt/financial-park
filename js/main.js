@@ -32,6 +32,9 @@
 
   function txt(nombre, valor) { var el = slot(nombre); if (el) el.textContent = valor; }
   function html(nombre, valor) { var el = slot(nombre); if (el) el.innerHTML = valor; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  }); }
 
   /* =========================================================
      HERO · MARCA · CONTACTO
@@ -48,6 +51,22 @@
     var hi = slot('hero-img'), hm = slot('hero-img-movil');
     if (hi) hi.src = C.hero.imagen;
     if (hm) hm.srcset = C.hero.imagenMovil || C.hero.imagen;
+
+    /* Video de fondo del hero (si hay uno y el navegador no pide "menos movimiento") */
+    var hv = slot('hero-video');
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (hv) {
+      if (C.hero.video && !reduceMotion) {
+        hv.poster = C.hero.imagen || '';
+        var source = document.createElement('source');
+        source.src = C.hero.video;
+        source.type = 'video/mp4';
+        hv.appendChild(source);
+        hv.style.display = '';
+      } else {
+        hv.style.display = 'none';
+      }
+    }
 
     txt('footer-bajada', C.marca.bajada);
 
@@ -103,34 +122,33 @@
   var filtroActual = 'todas';
   var rangoActual = null;
 
-  function fichaHTML(o) {
-    var media = o.foto
-      ? '<img src="' + o.foto + '" alt="Oficina ' + o.codigo + '" loading="lazy">'
-      : '<div class="ph"><span class="ph-code">' + o.codigo + '</span>' +
+  function fotosDe(o) {
+    if (o.fotos && o.fotos.length) return o.fotos;
+    return o.foto ? [o.foto] : [];
+  }
+
+  /* Ficha cerrada: solo lo esencial (metraje y piso). El resto se ve al hacer click. */
+  function fichaHTML(o, i) {
+    var fotos = fotosDe(o);
+    var media = fotos.length
+      ? '<img src="' + fotos[0] + '" alt="Oficina ' + esc(o.codigo) + '" loading="lazy">'
+      : '<div class="ph"><span class="ph-code">' + esc(o.codigo) + '</span>' +
         '<span class="ph-label">Foto pendiente</span></div>';
 
-    var tags = (o.caracteristicas || []).map(function (t) { return '<li>' + t + '</li>'; }).join('');
+    var pisoTxt = (o.piso || o.piso === 0) ? 'Piso ' + o.piso : 'Piso por confirmar';
 
-    return '<article class="listing' + (o.estado !== 'disponible' ? ' is-off' : '') + '" data-estado="' + o.estado + '" data-tipo="' + o.tipo + '" data-m2="' + o.m2 + '">' +
+    return '<article class="listing" data-estado="' + o.estado + '" data-tipo="' + o.tipo + '" data-m2="' + o.m2 + '" data-idx="' + i + '" tabindex="0" role="button" aria-label="Ver detalles de la oficina ' + esc(o.codigo) + '">' +
              '<div class="listing-media">' +
-               '<span class="badge ' + o.estado + '">' + o.estado + '</span>' + media +
+               '<span class="badge ' + o.estado + '">' + o.estado + '</span>' +
+               (o.real ? '<span class="badge-real">Real</span>' : '') +
+               media +
              '</div>' +
              '<div class="listing-body">' +
                '<div class="listing-top">' +
                  '<p class="listing-m2">' + o.m2 + '<span>m²</span></p>' +
-                 '<span class="listing-tipo">' + o.tipo + '</span>' +
                '</div>' +
-               '<p class="listing-title">' + o.codigo + ' · ' + o.torre + '</p>' +
-               '<p class="listing-sub">Piso ' + o.piso + ' · ' + o.vista + '</p>' +
-               '<dl class="listing-specs">' +
-                 '<div class="spec"><dt>Área</dt><dd>' + o.m2 + ' m²</dd></div>' +
-                 '<div class="spec"><dt>Altura de techo</dt><dd>' + o.altura + '</dd></div>' +
-                 '<div class="spec"><dt>Piso</dt><dd>' + o.piso + '</dd></div>' +
-                 '<div class="spec"><dt>Entrega</dt><dd>' + o.tipo + '</dd></div>' +
-               '</dl>' +
-               '<p class="listing-text">' + o.descripcion + '</p>' +
-               '<ul class="tags">' + tags + '</ul>' +
-               '<a class="listing-cta" href="#contacto" data-oficina="' + o.codigo + '">Solicitar información <span aria-hidden="true">→</span></a>' +
+               '<p class="listing-sub listing-piso">' + pisoTxt + '</p>' +
+               '<span class="listing-cta">Ver detalles <span aria-hidden="true">→</span></span>' +
              '</div>' +
            '</article>';
   }
@@ -138,7 +156,7 @@
   function pintarOficinas() {
     var cont = slot('oficinas'); if (!cont) return;
 
-    var lista = C.oficinas.filter(function (o) {
+    listaActual = C.oficinas.filter(function (o) {
       var okFiltro = filtroActual === 'todas' ||
                      (filtroActual === 'disponible' && o.estado === 'disponible') ||
                      o.tipo === filtroActual;
@@ -150,30 +168,27 @@
       return okFiltro && okRango;
     });
 
-    cont.innerHTML = lista.length
-      ? lista.map(fichaHTML).join('')
+    cont.innerHTML = listaActual.length
+      ? listaActual.map(fichaHTML).join('')
       : '<p class="empty">No hay oficinas que coincidan con ese filtro. <a href="#contacto">Escríbanos</a> y le buscamos una opción.</p>';
 
     var cuenta = $('#filtroCount');
     if (cuenta) {
-      cuenta.textContent = lista.length + (lista.length === 1 ? ' oficina' : ' oficinas') +
+      cuenta.textContent = listaActual.length + (listaActual.length === 1 ? ' oficina' : ' oficinas') +
                            (rangoActual ? ' · ' + rangoActual.replace('-', ' – ') + ' m²' : '');
     }
 
-    /* Al pedir info de una oficina, la preselecciona en el formulario */
-    $$('.listing-cta', cont).forEach(function (a) {
-      a.addEventListener('click', function () {
-        var sel = $('#interes');
-        if (!sel) return;
-        var cod = a.getAttribute('data-oficina');
-        Array.prototype.forEach.call(sel.options, function (op, i) {
-          if (op.value.indexOf(cod) === 0) sel.selectedIndex = i;
-        });
+    $$('.listing', cont).forEach(function (art) {
+      var abrir = function () { abrirModal(listaActual[+art.getAttribute('data-idx')]); };
+      art.addEventListener('click', abrir);
+      art.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrir(); }
       });
     });
 
     observar(cont);
   }
+  var listaActual = [];
 
   function pintarSelectOficinas() {
     var sel = slot('select-oficinas'); if (!sel) return;
@@ -181,9 +196,116 @@
       if (o.estado === 'alquilada') return;
       var op = document.createElement('option');
       op.value = o.codigo + ' · ' + o.m2 + ' m²';
-      op.textContent = o.codigo + ' · ' + o.torre + ' · ' + o.m2 + ' m²';
+      op.textContent = o.codigo + ' · ' + o.m2 + ' m²' + (o.piso || o.piso === 0 ? ' · Piso ' + o.piso : '');
       sel.appendChild(op);
     });
+  }
+
+  /* ---------- Preseleccionar oficina en el formulario y llevar el foco ---------- */
+  function preseleccionar(codigo) {
+    var sel = $('#interes');
+    if (!sel) return;
+    Array.prototype.forEach.call(sel.options, function (op, i) {
+      if (op.value.indexOf(codigo) === 0) sel.selectedIndex = i;
+    });
+  }
+
+  /* =========================================================
+     MODAL DE OFICINA (detalle + carrusel + WhatsApp por oficina)
+     ========================================================= */
+  var modal, modalBody, carouselTrack, carouselWrap;
+
+  function crearModal() {
+    modal = document.createElement('div');
+    modal.className = 'oficina-modal';
+    modal.setAttribute('aria-hidden', 'true');
+    modal.innerHTML =
+      '<div class="oficina-modal-backdrop" data-close></div>' +
+      '<div class="oficina-modal-panel" role="dialog" aria-modal="true" aria-label="Detalle de oficina">' +
+        '<button type="button" class="oficina-modal-close" data-close aria-label="Cerrar">✕</button>' +
+        '<div class="oficina-carousel">' +
+          '<button type="button" class="carousel-arrow carousel-prev" aria-label="Foto anterior">‹</button>' +
+          '<div class="carousel-track"></div>' +
+          '<button type="button" class="carousel-arrow carousel-next" aria-label="Foto siguiente">›</button>' +
+        '</div>' +
+        '<div class="oficina-modal-body"></div>' +
+      '</div>';
+    document.body.appendChild(modal);
+    modalBody = $('.oficina-modal-body', modal);
+    carouselTrack = $('.carousel-track', modal);
+    carouselWrap = $('.oficina-carousel', modal);
+
+    $$('[data-close]', modal).forEach(function (el) { el.addEventListener('click', cerrarModal); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') cerrarModal(); });
+    $('.carousel-prev', modal).addEventListener('click', function () { desplazarCarrusel(-1); });
+    $('.carousel-next', modal).addEventListener('click', function () { desplazarCarrusel(1); });
+  }
+
+  function desplazarCarrusel(dir) {
+    if (!carouselTrack) return;
+    var img = carouselTrack.querySelector('img');
+    var ancho = img ? img.getBoundingClientRect().width + 10 : carouselTrack.clientWidth;
+    carouselTrack.scrollBy({ left: dir * ancho, behavior: 'smooth' });
+  }
+
+  function abrirModal(o) {
+    if (!modal) crearModal();
+    var fotos = fotosDe(o);
+
+    carouselTrack.innerHTML = fotos.length
+      ? fotos.map(function (f) { return '<img src="' + f + '" alt="Foto de la oficina ' + esc(o.codigo) + '">'; }).join('')
+      : '<div class="ph carousel-ph"><span class="ph-code">' + esc(o.codigo) + '</span><span class="ph-label">Foto pendiente</span></div>';
+    carouselWrap.classList.toggle('has-multi', fotos.length > 1);
+    carouselTrack.scrollTo({ left: 0 });
+
+    var specs = [
+      ['Área', o.m2 + ' m²'],
+      ['Piso', (o.piso || o.piso === 0) ? o.piso : 'Por confirmar'],
+      ['Altura de techo', o.altura || 'Por confirmar'],
+      ['Entrega', o.tipo || 'Por confirmar']
+    ];
+    if (o.torre) specs.push(['Torre', o.torre]);
+    if (o.vista) specs.push(['Vista', o.vista]);
+
+    var tags = (o.caracteristicas || []).map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('');
+
+    var mensajeWA = 'Hola, quiero más información sobre la oficina ' + o.codigo +
+      ' (' + o.m2 + ' m²' + ((o.piso || o.piso === 0) ? ', piso ' + o.piso : '') + ') de Financial Park.';
+    var waUrl = 'https://wa.me/' + C.contacto.whatsapp + '?text=' + encodeURIComponent(mensajeWA);
+
+    modalBody.innerHTML =
+      '<div class="modal-head">' +
+        '<span class="badge ' + o.estado + '">' + o.estado + '</span>' +
+        (o.real ? '<span class="badge-real">Oficina real</span>' : '') +
+        '<p class="listing-title">' + esc(o.codigo) + (o.torre ? ' · ' + esc(o.torre) : '') + '</p>' +
+      '</div>' +
+      '<dl class="listing-specs">' +
+        specs.map(function (s) {
+          return '<div class="spec"><dt>' + s[0] + '</dt><dd>' + esc(s[1]) + '</dd></div>';
+        }).join('') +
+      '</dl>' +
+      (o.descripcion ? '<p class="listing-text">' + esc(o.descripcion) + '</p>' : '') +
+      (tags ? '<ul class="tags">' + tags + '</ul>' : '') +
+      '<div class="modal-ctas">' +
+        '<a class="btn btn-primary listing-cta-btn" href="#contacto" data-oficina="' + esc(o.codigo) + '">Solicitar información</a>' +
+        '<a class="btn btn-whatsapp" href="' + waUrl + '" target="_blank" rel="noopener">Preguntar por esta oficina</a>' +
+      '</div>';
+
+    $('.listing-cta-btn', modalBody).addEventListener('click', function () {
+      preseleccionar(o.codigo);
+      cerrarModal();
+    });
+
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+  }
+
+  function cerrarModal() {
+    if (!modal) return;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
   }
 
   /* ---------- Llave en mano ---------- */
@@ -242,6 +364,15 @@
              '<p class="stat-label">' + s.etiqueta + '</p></div>';
     }).join(''));
     observar(slot('dev-stats'));
+
+    var fotosCont = slot('dev-fotos');
+    if (fotosCont) {
+      var fotos = D.fotos || [];
+      fotosCont.innerHTML = fotos.map(function (f) {
+        return '<div class="dev-photo reveal"><img src="' + f + '" alt="Desarrollo Bahía" loading="lazy"></div>';
+      }).join('');
+      observar(fotosCont);
+    }
   }
 
   /* =========================================================
