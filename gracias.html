@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gracias · Financial Park</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  .gracias{
+    min-height:100svh;
+    display:flex;
+    align-items:center;
+    background:var(--navy);
+    position:relative;
+    overflow:hidden;
+    text-align:left;
+  }
+  .gracias-media{ position:absolute; inset:0; }
+  .gracias-media img{ width:100%; height:100%; object-fit:cover; opacity:.35; }
+  .gracias-inner{ position:relative; z-index:2; padding:100px 0; }
+  .gracias h1{
+    font-family:var(--serif);
+    font-weight:400;
+    color:#fff;
+    font-size:clamp(2.4rem, 6vw, 4.4rem);
+    line-height:1.05;
+    margin:.1em 0 .4em;
+  }
+  .gracias p{ color:rgba(255,255,255,.82); max-width:560px; font-weight:300; font-size:1.06rem; }
+</style>
+</head>
+<body>
+
+<section class="gracias">
+  <div class="gracias-media">
+    <img src="img/torre-atardecer.jpg" alt="">
+  </div>
+  <div class="hero-overlay"></div>
+
+  <div class="wrap gracias-inner">
+    <p class="eyebrow eyebrow-light">Solicitud recibida</p>
+    <h1>Gracias por escribirnos</h1>
+    <p>Hemos recibido su solicitud. Un asesor de Financial Park se comunicará con usted el mismo día hábil para coordinar la visita.</p>
+    <p style="margin-top:2.4em">
+      <a class="btn btn-ghost btn-lg" href="index.html">Volver al inicio</a>
+    </p>
+  </div>
+</section>
+
+</body>
+</html>
