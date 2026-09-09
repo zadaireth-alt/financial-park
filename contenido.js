@@ -54,8 +54,8 @@ const CONTENIDO = {
     // bug del 09/09/2026: el poster era de un dron/video viejo distinto).
     // Mismo "?v=" que el video y misma regla: al reemplazar la imagen, subir
     // el archivo con el mismo nombre Y subir este número en 1.
-    imagen: "img/hero-poster.jpg?v=2",
-    imagenMovil: "img/hero-poster.jpg?v=2"
+    imagen: "img/hero-poster.jpg?v=3",
+    imagenMovil: "img/hero-poster.jpg?v=3"
   },
 
   /* ---------- BANDAS A SANGRE (fotos de borde a borde) ---------- */
