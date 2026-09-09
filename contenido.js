@@ -42,7 +42,12 @@ const CONTENIDO = {
     ctaPrimario: { texto: "Ver oficinas disponibles", href: "#oficinas" },
     ctaSecundario: { texto: "Agendar una visita", href: "#contacto" },
     // Video de fondo del hero. Si "video" queda en null, se usa solo la imagen.
-    video: "video/hero.mp4",
+    // El "?v=" al final es a propósito: fuerza a que el navegador y el CDN de
+    // Netlify carguen el archivo nuevo en vez de servir el video viejo desde
+    // caché (mismo nombre de archivo, contenido distinto). Cada vez que se
+    // reemplace este video, hay que subir el archivo nuevo con el mismo
+    // nombre Y subir este número en 1 (ver decisión 25 en 01-DECISIONES.md).
+    video: "video/hero.mp4?v=2",
     // Imagen de respaldo (se ve mientras carga el video, y si el navegador no puede reproducirlo)
     imagen: "img/hero-poster.jpg",
     imagenMovil: "img/hero-poster.jpg"
