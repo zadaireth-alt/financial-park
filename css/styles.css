@@ -148,7 +148,7 @@ button{ font-family:inherit; }
   top:-14px; left:-26px;
   height:41px; width:auto; max-width:none;
 }
-.brand-footer .brand-logo{ width:230px; height:25px; }
+.brand-footer .brand-logo{ width:230px; height:25px; margin:0 auto; }
 .brand-footer .brand-logo img{ top:-30px; left:-55px; height:86px; }
 
 /* Logo grande del hero (reemplaza el texto "Financial Park" sobre el video).
