@@ -159,8 +159,10 @@ button{ font-family:inherit; }
    hace falta calcular números distintos por tamaño de pantalla.
    El texto real ("Financial Park", desde contenido.js) se deja transparente
    pero sigue ahí para lectores de pantalla y buscadores. */
-.hero-title-logo{
+h1.hero-title-logo{
   color:transparent;
+  font-size:0;
+  line-height:0;
   background-image:url("../img/fp2%20logos-02.png");
   background-repeat:no-repeat;
   background-position:center;
@@ -168,6 +170,7 @@ button{ font-family:inherit; }
   aspect-ratio:1682/185;
   width:clamp(220px, 46vw, 640px);
   margin:.04em auto .38em;
+  overflow:hidden;
 }
 .nav{ display:flex; align-items:center; gap:clamp(14px, 2vw, 30px); }
 .nav > a{
