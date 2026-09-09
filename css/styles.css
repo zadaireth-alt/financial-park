@@ -130,6 +130,26 @@ button{ font-family:inherit; }
   letter-spacing:-0.02em;
   color:#fff;
 }
+/* Logo: el archivo que subió Zara (img/fp2 logos-02.png) trae bastante margen
+   transparente alrededor del wordmark. En vez de pedirle que suba una versión
+   recortada, se recorta acá con CSS: la imagen real (2481x627px) se agranda y
+   se desplaza dentro de una caja más chica con overflow:hidden, mostrando solo
+   la zona donde está el logo. Si algún día se reemplaza el archivo por uno ya
+   recortado (sin ese margen), estos números dejan de hacer falta y basta con
+   quitar el overflow:hidden / position:absolute de abajo. */
+.brand-logo{
+  display:block;
+  width:255px; height:28px;
+  overflow:hidden;
+  position:relative;
+}
+.brand-logo img{
+  position:absolute;
+  top:-33px; left:-60px;
+  height:95px; width:auto; max-width:none;
+}
+.brand-footer .brand-logo{ width:309px; height:34px; }
+.brand-footer .brand-logo img{ top:-41px; left:-73px; height:115px; }
 .nav{ display:flex; align-items:center; gap:clamp(14px, 2vw, 30px); }
 .nav > a{
   font-size:.72rem;
