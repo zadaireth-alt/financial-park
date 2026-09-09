@@ -57,7 +57,6 @@
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (hv) {
       if (C.hero.video && !reduceMotion) {
-        hv.poster = C.hero.imagen || '';
         var source = document.createElement('source');
         source.src = C.hero.video;
         source.type = 'video/mp4';
