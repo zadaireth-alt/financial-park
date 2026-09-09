@@ -16,4 +16,13 @@
     # reconstruir el sitio en el navegador y republicar sin subir archivos.
     Access-Control-Allow-Origin = "*"
 
+[[headers]]
+  for = "/video/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    # Cache "para siempre" a propósito: contenido.js referencia el video con
+    # un "?v=" al final (ver decisión 25 en 01-DECISIONES.md). Para reemplazar
+    # el video, se sube el archivo nuevo con el mismo nombre Y se sube ese
+    # número — así nunca queda una versión vieja en caché.
+
 # Netlify Forms activado el 07/09/2026 (redeploy para que registre el formulario "contacto").
