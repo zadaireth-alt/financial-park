@@ -62,6 +62,15 @@
         source.type = 'video/mp4';
         hv.appendChild(source);
         hv.style.display = '';
+        /* El video arranca en opacity:0 (ver .hero-video en styles.css) y
+           se muestra recién cuando el navegador ya tiene su primer fotograma
+           real ("loadeddata"). Antes de eso se ve la imagen de respaldo de
+           abajo, que es ese mismo primer fotograma — así el cambio de
+           imagen a video queda invisible, sin saltos ni parpadeos. */
+        hv.addEventListener('loadeddata', function () {
+          hv.classList.add('is-ready');
+        }, { once: true });
+        hv.load();
       } else {
         hv.style.display = 'none';
       }
