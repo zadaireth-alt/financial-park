@@ -48,9 +48,14 @@ const CONTENIDO = {
     // reemplace este video, hay que subir el archivo nuevo con el mismo
     // nombre Y subir este número en 1 (ver decisión 25 en 01-DECISIONES.md).
     video: "video/hero.mp4?v=2",
-    // Imagen de respaldo (se ve mientras carga el video, y si el navegador no puede reproducirlo)
-    imagen: "img/hero-poster.jpg",
-    imagenMovil: "img/hero-poster.jpg"
+    // Imagen de respaldo (se ve mientras carga el video, y si el navegador no puede reproducirlo).
+    // Debe ser SIEMPRE el primer fotograma real del video de arriba — si no
+    // coinciden, se ve un salto/flash al pasar del poster al video (fue el
+    // bug del 09/09/2026: el poster era de un dron/video viejo distinto).
+    // Mismo "?v=" que el video y misma regla: al reemplazar la imagen, subir
+    // el archivo con el mismo nombre Y subir este número en 1.
+    imagen: "img/hero-poster.jpg?v=2",
+    imagenMovil: "img/hero-poster.jpg?v=2"
   },
 
   /* ---------- BANDAS A SANGRE (fotos de borde a borde) ---------- */
