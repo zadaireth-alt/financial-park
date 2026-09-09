@@ -212,7 +212,18 @@ h1.hero-title-logo{
   width:100%; height:100%;
   object-fit:cover; object-position:center 45%;
   background:var(--navy-deep);
+  /* Oculto hasta que el propio JS confirme que ya tiene el primer fotograma
+     listo (clase "is-ready"). Así nunca se ve un video a medio cargar,
+     pantalla negra o un fotograma viejo — solo la imagen de respaldo de
+     abajo, y luego un fundido suave hacia el video ya reproduciendo.
+     IMPORTANTE: no quitar estas dos reglas (opacity/transition e is-ready) ni
+     el bloque correspondiente en js/main.js — sin ellas el video aparece de
+     golpe y, mientras carga, se ve un bloque azul liso en vez de la imagen
+     de respaldo. Esto es lo que evita el salto/parpadeo del hero. */
+  opacity:0;
+  transition:opacity .5s ease;
 }
+.hero-video.is-ready{ opacity:1; }
 .hero-video[style*="display: none"] + picture{ position:absolute; inset:0; }
 @media (prefers-reduced-motion: reduce){
   .hero-video{ display:none !important; }
