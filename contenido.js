@@ -47,7 +47,7 @@ const CONTENIDO = {
     // caché (mismo nombre de archivo, contenido distinto). Cada vez que se
     // reemplace este video, hay que subir el archivo nuevo con el mismo
     // nombre Y subir este número en 1 (ver decisión 25 en 01-DECISIONES.md).
-    video: "video/hero.mp4?v=2",
+    video: "video/hero.mp4?v=3",
     // Imagen de respaldo (se ve mientras carga el video, y si el navegador no puede reproducirlo).
     // Debe ser SIEMPRE el primer fotograma real del video de arriba — si no
     // coinciden, se ve un salto/flash al pasar del poster al video (fue el
