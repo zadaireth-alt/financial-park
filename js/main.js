@@ -36,6 +36,32 @@
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
   }); }
 
+  /* ---------- Carga suave de imágenes (fade-in al terminar de cargar) ---------- */
+  (function () {
+    function marcarListo(img) {
+      if (img.classList.contains('img-ready')) return;
+      if (img.complete && img.naturalWidth > 0) {
+        img.classList.add('img-ready');
+      } else {
+        img.addEventListener('load', function () { img.classList.add('img-ready'); }, { once: true });
+        img.addEventListener('error', function () { img.classList.add('img-ready'); }, { once: true });
+      }
+    }
+    function procesarImagenes(raiz) { $$('img', raiz).forEach(marcarListo); }
+    procesarImagenes(document);
+    if ('MutationObserver' in window) {
+      new MutationObserver(function (mutaciones) {
+        mutaciones.forEach(function (m) {
+          m.addedNodes.forEach(function (n) {
+            if (n.nodeType !== 1) return;
+            if (n.tagName === 'IMG') marcarListo(n);
+            else if (n.querySelectorAll) procesarImagenes(n);
+          });
+        });
+      }).observe(document.body, { childList: true, subtree: true });
+    }
+  })();
+
   /* =========================================================
      HERO · MARCA · CONTACTO
      ========================================================= */
