@@ -21,6 +21,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="img/hero-poster.jpg?v=3" fetchpriority="high">
+<link rel="preload" as="video" href="video/hero.mp4?v=3">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -49,7 +51,7 @@
 <!-- ═══════════ 01 · HERO ═══════════ -->
 <section class="hero">
   <div class="hero-media">
-    <video class="hero-video" data-slot="hero-video" autoplay muted loop playsinline preload="auto"></video>
+    <video class="hero-video" data-slot="hero-video" autoplay muted loop playsinline preload="auto" poster="img/hero-poster.jpg?v=3"></video>
     <picture>
       <source media="(max-width: 760px)" data-slot="hero-img-movil" srcset="">
       <img data-slot="hero-img" src="" alt="Financial Park, Costa del Este" fetchpriority="high">
