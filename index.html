@@ -2,6 +2,14 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<script>
+(function(){
+  try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch(e){}
+  if (location.hash) {
+    try { history.replaceState(null, '', location.pathname + location.search); } catch(e){}
+  }
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Financial Park · Oficinas en alquiler en Costa del Este, Panamá</title>
 <meta name="description" content="Oficinas corporativas en alquiler de 94 a 1,022 m² en Costa del Este, Panamá. Espacios llave en mano listos para operar. Financial Park, por Desarrollo Bahía.">
