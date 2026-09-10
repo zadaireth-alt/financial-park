@@ -199,6 +199,7 @@ h1.hero-title-logo{
 
 /* ---------- Hero (centrado) ---------- */
 .hero{
+  background:var(--navy-deep);
   position:relative;
   min-height:100svh;
   display:flex;
