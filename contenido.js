@@ -38,7 +38,7 @@ const CONTENIDO = {
   hero: {
     eyebrow: "Oficinas y locales comerciales · Costa del Este",
     titulo: "Financial Park",
-    bajada: "En el corazón financiero de una de las zonas más exclusivas de la ciudad. Oficinas de 94 a 1,022 m², a pasos de hoteles, restaurantes y todo lo que su operación necesita.",
+    bajada: "735,000 m² construidos y otros 75,000 m² en desarrollo, con proyectos que van desde residenciales de lujo hasta modernos centros comerciales, bodegas, oficinas y hoteles en una de las zonas más exclusivas de la ciudad.",
     ctaPrimario: { texto: "Ver oficinas disponibles", href: "#oficinas" },
     ctaSecundario: { texto: "Agendar una visita", href: "#contacto" },
     // Video de fondo del hero. Si "video" queda en null, se usa solo la imagen.
