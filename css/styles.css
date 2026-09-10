@@ -562,6 +562,33 @@ h1.hero-title-logo{
   text-wrap:balance;
 }
 
+/* ---------- Empresas aliadas ---------- */
+.logos-grid{
+  display:grid;
+  grid-template-columns:repeat(5, 1fr);
+  gap:clamp(28px, 4vw, 56px) clamp(24px, 3vw, 48px);
+  align-items:center;
+  justify-items:center;
+  max-width:1040px;
+  margin:0 auto;
+}
+.logo-item{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:clamp(46px, 5vw, 64px);
+}
+.logo-item img{
+  max-height:100%;
+  max-width:100%;
+  width:auto;
+  height:auto;
+  object-fit:contain;
+  transition:transform .3s ease;
+}
+.logo-item:hover img{ transform:scale(1.05); }
+
 /* ---------- Ubicación ---------- */
 .location{ display:grid; grid-template-columns:1.5fr 1fr; gap:clamp(22px, 3vw, 40px); align-items:stretch; }
 .map{ border:1px solid var(--line); border-radius:var(--r-card); overflow:hidden; background:var(--soft); min-height:420px; }
@@ -710,6 +737,7 @@ h1.hero-title-logo{
   .databar-inner{ grid-template-columns:1fr 1fr; gap:28px 20px; }
   .databar-item:nth-child(3){ border-left:0; }
   .stats{ grid-template-columns:1fr; gap:30px; }
+  .logos-grid{ grid-template-columns:repeat(3, 1fr); }
 }
 
 @media (max-width: 760px){
@@ -744,6 +772,7 @@ h1.hero-title-logo{
   .to-top{ right:16px; bottom:16px; width:44px; height:44px; }
   .oficina-modal{ padding:0; }
   .oficina-modal-panel{ max-height:100vh; height:100%; border-radius:0; }
+  .logos-grid{ grid-template-columns:repeat(2, 1fr); gap:28px 24px; }
 }
 
 @media (prefers-reduced-motion: reduce){
