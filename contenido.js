@@ -230,10 +230,10 @@ const CONTENIDO = {
       m2: 104,
       altura: null,
       estado: "disponible",
-      tipo: "Obra gris (espacio vacío, sin amoblar)",
+      tipo: "Obra gris",
       vista: null,
       descripcion: "Oficina real disponible en el piso 23, de 104 m². A diferencia de las demás oficinas disponibles, este espacio está vacío y sin amoblar — no es de tipo llave en mano. Estas fotos son del espacio real — el resto de la ficha (altura, características) se confirma con el cliente.",
-      caracteristicas: [],
+      caracteristicas: ["Espacio vacío", "Sin amoblar"],
       real: true,
       foto: "img/of-23c-01.jpg",
       fotos: [
