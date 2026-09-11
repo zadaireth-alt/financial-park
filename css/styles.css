@@ -227,6 +227,18 @@ h1.hero-title-logo{
   transition:opacity .5s ease;
 }
 .hero-video.is-ready{ opacity:1; }
+/* En iPhone/Safari (y otros navegadores basados en WebKit) a veces se
+   muestra un botón de reproducción grande encima del video incluso sin el
+   atributo "controls". Estas reglas lo ocultan para que nunca se vea
+   ningún botón ni interfaz de reproductor sobre el video del hero. */
+.hero-video::-webkit-media-controls,
+.hero-video::-webkit-media-controls-start-playback-button,
+.hero-video::-webkit-media-controls-panel{
+  display:none !important;
+  -webkit-appearance:none;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
 .hero-video[style*="display: none"] + picture{ position:absolute; inset:0; }
 @media (prefers-reduced-motion: reduce){
   .hero-video{ display:none !important; }
