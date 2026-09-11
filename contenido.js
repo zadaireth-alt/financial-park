@@ -98,10 +98,10 @@ const CONTENIDO = {
       m2: 234,
       altura: null,
       estado: "disponible",
-      tipo: "Por confirmar",
+      tipo: "Llave en mano",
       vista: null,
       descripcion: "Oficina real disponible en el piso 5, de 234 m². Estas fotos y el plano son del espacio real — el resto de la ficha (tipo de entrega, altura, características) se confirma con el cliente.",
-      caracteristicas: [],
+      caracteristicas: ["Amoblada"],
       real: true,
       foto: "img/of-05b-01.jpg",
       fotos: [
