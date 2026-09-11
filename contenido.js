@@ -269,34 +269,6 @@ const CONTENIDO = {
       ],
       plano: null
     },
-    {
-      codigo: "OF-604",
-      torre: "Torre A",
-      piso: 6,
-      m2: 94,
-      altura: "3.20 m",
-      estado: "disponible",
-      tipo: "Llave en mano",
-      vista: "Vista interior",
-      descripcion: "La opción de entrada: amoblada, con divisiones y todos los servicios listos para operar desde el primer día.",
-      caracteristicas: ["1 privado", "Amoblada", "Divisiones incluidas", "Lista para operar"],
-      foto: "img/referencia-4.jpg",
-      plano: null
-    },
-    {
-      codigo: "OF-2000",
-      torre: "Torre B",
-      piso: 20,
-      m2: 1022,
-      altura: "3.60 m",
-      estado: "disponible",
-      tipo: "Obra gris",
-      vista: "Vista 360°",
-      descripcion: "Planta completa, la mayor disponible en el edificio. Pensada para casas matrices y operaciones regionales.",
-      caracteristicas: ["Planta completa", "Vista 360°", "Acceso privado", "Casa matriz"],
-      foto: "img/referencia-6.jpg",
-      plano: null
-    }
   ],
 
   /* =============================================================
