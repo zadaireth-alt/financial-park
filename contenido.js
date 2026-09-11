@@ -243,6 +243,33 @@ const CONTENIDO = {
       plano: null
     },
     {
+      codigo: "42A",
+      torre: null,
+      piso: 42,
+      m2: 154,
+      altura: null,
+      estado: "disponible",
+      tipo: "Por confirmar",
+      vista: null,
+      descripcion: "Oficina real disponible en el piso 42, de 154 m². Estas fotos son del espacio real — el resto de la ficha (tipo de entrega, altura, características) se confirma con el cliente.",
+      caracteristicas: [],
+      real: true,
+      foto: "img/of-42a-01.jpg",
+      fotos: [
+        "img/of-42a-01.jpg",
+        "img/of-42a-02.jpg",
+        "img/of-42a-03.jpg",
+        "img/of-42a-04.jpg",
+        "img/of-42a-05.jpg",
+        "img/of-42a-06.jpg",
+        "img/of-42a-07.jpg",
+        "img/of-42a-08.jpg",
+        "img/of-42a-09.jpg",
+        "img/of-42a-10.jpg"
+      ],
+      plano: null
+    },
+    {
       codigo: "OF-604",
       torre: "Torre A",
       piso: 6,
