@@ -198,6 +198,32 @@ const CONTENIDO = {
       plano: null
     },
     {
+      codigo: "06I",
+      torre: null,
+      piso: 6,
+      m2: 115,
+      altura: null,
+      estado: "disponible",
+      tipo: "Por confirmar",
+      vista: null,
+      descripcion: "Oficina real disponible en el piso 6, de 115 m². Estas fotos son del espacio real — el resto de la ficha (tipo de entrega, altura, características) se confirma con el cliente.",
+      caracteristicas: [],
+      real: true,
+      foto: "img/of-06i-01.jpg",
+      fotos: [
+        "img/of-06i-01.jpg",
+        "img/of-06i-02.jpg",
+        "img/of-06i-03.jpg",
+        "img/of-06i-04.jpg",
+        "img/of-06i-05.jpg",
+        "img/of-06i-06.jpg",
+        "img/of-06i-07.jpg",
+        "img/of-06i-08.jpg",
+        "img/of-06i-09.jpg"
+      ],
+      plano: null
+    },
+    {
       codigo: "OF-604",
       torre: "Torre A",
       piso: 6,
