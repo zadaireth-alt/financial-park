@@ -98,11 +98,32 @@
         hv.addEventListener('loadeddata', function () {
           hv.classList.add('is-ready');
         }, { once: true });
+        hv.muted = true;
+        hv.defaultMuted = true;
+        hv.setAttribute('webkit-playsinline', '');
+        /* En iPhone/Safari (y algunos otros navegadores móviles) un solo
+           intento automático de reproducir a veces no alcanza y el video
+           se queda pausado, como esperando que alguien le dé play. Por eso
+           se reintenta en varios momentos: apenas se prepara, cuando ya
+           tiene datos, cuando puede reproducirse sin cortes, si la persona
+           vuelve a la pestaña, y ante el primer toque/clic en la página. */
+        var intentarReproducir = function () {
+          if (!hv.paused) return;
+          var intento = hv.play();
+          if (intento && typeof intento.catch === 'function') {
+            intento.catch(function () { /* el navegador bloqueó el autoplay; se reintenta más adelante */ });
+          }
+        };
         hv.load();
-        var intentoReproducir = hv.play();
-        if (intentoReproducir && typeof intentoReproducir.then === 'function') {
-          intentoReproducir.catch(function () { /* el navegador bloqueó el autoplay; se queda en el poster */ });
-        }
+        intentarReproducir();
+        hv.addEventListener('loadeddata', intentarReproducir);
+        hv.addEventListener('canplay', intentarReproducir);
+        document.addEventListener('visibilitychange', function () {
+          if (!document.hidden) intentarReproducir();
+        });
+        ['touchstart', 'click'].forEach(function (ev) {
+          document.addEventListener(ev, intentarReproducir, { once: true, passive: true });
+        });
       } else {
         hv.style.display = 'none';
       }
