@@ -150,48 +150,6 @@ const CONTENIDO = {
       plano: null
     },
     {
-      codigo: "OF-1204",
-      torre: "Torre A",
-      piso: 12,
-      m2: 210,
-      altura: "3.20 m",
-      estado: "disponible",
-      tipo: "Llave en mano",
-      vista: "Vista al mar",
-      descripcion: "Planta completa con recepción, cuatro privados y sala de juntas. Entregada lista para instalar la operación.",
-      caracteristicas: ["4 privados", "Sala de juntas", "Recepción", "Cocineta"],
-      foto: "img/referencia-1.jpg",
-      plano: null
-    },
-    {
-      codigo: "OF-902",
-      torre: "Torre A",
-      piso: 9,
-      m2: 145,
-      altura: "3.20 m",
-      estado: "disponible",
-      tipo: "Amoblada",
-      vista: "Vista a la ciudad",
-      descripcion: "Espacio abierto con dos privados, cocineta y área de espera propia. Ideal para equipos de 18 a 22 personas.",
-      caracteristicas: ["2 privados", "Área abierta", "Cocineta", "Área de espera"],
-      foto: "img/referencia-2.jpg",
-      plano: null
-    },
-    {
-      codigo: "OF-1501",
-      torre: "Torre B",
-      piso: 15,
-      m2: 320,
-      altura: "3.60 m",
-      estado: "reservada",
-      tipo: "Llave en mano",
-      vista: "Vista panorámica",
-      descripcion: "Penthouse corporativo con terraza privada y acabados premium. Doble altura en el acceso.",
-      caracteristicas: ["Terraza privada", "6 privados", "Sala de juntas", "Acabados premium"],
-      foto: "img/referencia-3.jpg",
-      plano: null
-    },
-    {
       codigo: "OF-604",
       torre: "Torre A",
       piso: 6,
@@ -203,20 +161,6 @@ const CONTENIDO = {
       descripcion: "La opción de entrada: amoblada, con divisiones y todos los servicios listos para operar desde el primer día.",
       caracteristicas: ["1 privado", "Amoblada", "Divisiones incluidas", "Lista para operar"],
       foto: "img/referencia-4.jpg",
-      plano: null
-    },
-    {
-      codigo: "OF-1801",
-      torre: "Torre B",
-      piso: 18,
-      m2: 640,
-      altura: "3.60 m",
-      estado: "disponible",
-      tipo: "Obra gris",
-      vista: "Vista al mar",
-      descripcion: "Media planta para diseñar a la medida. Luz natural en todo el perímetro y capacidad para más de 70 puestos.",
-      caracteristicas: ["Planta libre", "Luz natural perimetral", "+70 puestos", "A la medida"],
-      foto: "img/referencia-5.jpg",
       plano: null
     },
     {
