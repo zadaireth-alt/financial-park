@@ -224,6 +224,25 @@ const CONTENIDO = {
       plano: null
     },
     {
+      codigo: "23C",
+      torre: null,
+      piso: 23,
+      m2: 104,
+      altura: null,
+      estado: "disponible",
+      tipo: "Por confirmar",
+      vista: null,
+      descripcion: "Oficina real disponible en el piso 23, de 104 m². Estas fotos son del espacio real — el resto de la ficha (tipo de entrega, altura, características) se confirma con el cliente.",
+      caracteristicas: [],
+      real: true,
+      foto: "img/of-23c-01.jpg",
+      fotos: [
+        "img/of-23c-01.jpg",
+        "img/of-23c-02.jpg"
+      ],
+      plano: null
+    },
+    {
       codigo: "OF-604",
       torre: "Torre A",
       piso: 6,
