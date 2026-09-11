@@ -83,10 +83,10 @@
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (hv) {
       if (C.hero.video && !reduceMotion) {
-        var source = document.createElement('source');
-        source.src = C.hero.video;
+        var source = hv.querySelector('source') || document.createElement('source');
         source.type = 'video/mp4';
-        hv.appendChild(source);
+        source.src = C.hero.video;
+        if (!source.parentNode) hv.appendChild(source);
         hv.style.display = '';
         /* El video arranca en opacity:0 (ver .hero-video en styles.css) y
            se muestra recién cuando el navegador ya tiene su primer fotograma
@@ -105,25 +105,43 @@
            intento automático de reproducir a veces no alcanza y el video
            se queda pausado, como esperando que alguien le dé play. Por eso
            se reintenta en varios momentos: apenas se prepara, cuando ya
-           tiene datos, cuando puede reproducirse sin cortes, si la persona
-           vuelve a la pestaña, y ante el primer toque/clic en la página. */
+           tiene datos, cuando puede reproducirse sin cortes, cuando el hero
+           entra en pantalla, si la persona vuelve a la pestaña, y ante el
+           primer toque/clic/scroll en la página. */
+        var avisoAutoplay = false;
         var intentarReproducir = function () {
           if (!hv.paused) return;
           var intento = hv.play();
           if (intento && typeof intento.catch === 'function') {
-            intento.catch(function () { /* el navegador bloqueó el autoplay; se reintenta más adelante */ });
+            intento.catch(function (err) {
+              if (!avisoAutoplay) {
+                avisoAutoplay = true;
+                if (window.console && console.warn) {
+                  console.warn('No se pudo iniciar el video automáticamente (se reintentará):', err);
+                }
+              }
+            });
           }
         };
         hv.load();
         intentarReproducir();
         hv.addEventListener('loadeddata', intentarReproducir);
         hv.addEventListener('canplay', intentarReproducir);
+        hv.addEventListener('canplaythrough', intentarReproducir);
         document.addEventListener('visibilitychange', function () {
           if (!document.hidden) intentarReproducir();
         });
-        ['touchstart', 'click'].forEach(function (ev) {
+        ['touchstart', 'touchmove', 'click', 'scroll'].forEach(function (ev) {
           document.addEventListener(ev, intentarReproducir, { once: true, passive: true });
         });
+        if ('IntersectionObserver' in window) {
+          var ioHeroVideo = new IntersectionObserver(function (entradas) {
+            entradas.forEach(function (entrada) {
+              if (entrada.isIntersecting) intentarReproducir();
+            });
+          }, { threshold: 0.1 });
+          ioHeroVideo.observe(hv);
+        }
       } else {
         hv.style.display = 'none';
       }
