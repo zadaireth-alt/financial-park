@@ -242,7 +242,8 @@
     listaActual = C.oficinas.filter(function (o) {
       var okFiltro = filtroActual === 'todas' ||
                      (filtroActual === 'disponible' && o.estado === 'disponible') ||
-                     o.tipo === filtroActual;
+                     o.tipo === filtroActual ||
+                     (o.caracteristicas && o.caracteristicas.indexOf(filtroActual) !== -1);
       var okRango = true;
       if (rangoActual) {
         var p = rangoActual.split('-');
