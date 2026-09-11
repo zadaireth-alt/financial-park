@@ -225,6 +225,7 @@ h1.hero-title-logo{
      de respaldo. Esto es lo que evita el salto/parpadeo del hero. */
   opacity:0;
   transition:opacity .5s ease;
+  pointer-events:none;
 }
 .hero-video.is-ready{ opacity:1; }
 /* En iPhone/Safari (y otros navegadores basados en WebKit) a veces se
@@ -233,6 +234,7 @@ h1.hero-title-logo{
    ningún botón ni interfaz de reproductor sobre el video del hero. */
 .hero-video::-webkit-media-controls,
 .hero-video::-webkit-media-controls-start-playback-button,
+.hero-video::-webkit-media-controls-overlay-play-button,
 .hero-video::-webkit-media-controls-panel{
   display:none !important;
   -webkit-appearance:none;
