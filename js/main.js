@@ -99,6 +99,10 @@
           hv.classList.add('is-ready');
         }, { once: true });
         hv.load();
+        var intentoReproducir = hv.play();
+        if (intentoReproducir && typeof intentoReproducir.then === 'function') {
+          intentoReproducir.catch(function () { /* el navegador bloqueó el autoplay; se queda en el poster */ });
+        }
       } else {
         hv.style.display = 'none';
       }
