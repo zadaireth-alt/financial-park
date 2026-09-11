@@ -88,39 +88,36 @@
         source.src = C.hero.video;
         if (!source.parentNode) hv.appendChild(source);
         hv.style.display = '';
-        /* El video arranca en opacity:0 (ver .hero-video en styles.css) y
-           se muestra recién cuando el navegador ya tiene su primer fotograma
-           real ("loadeddata"). Antes de eso se ve la imagen de respaldo de
-           abajo, que es ese mismo primer fotograma — así el cambio de
-           imagen a video queda invisible, sin saltos ni parpadeos.
-           IMPORTANTE: no quitar este bloque ni las reglas opacity/is-ready
-           de styles.css — sin ellos el video aparece de golpe. */
-        hv.addEventListener('loadeddata', function () {
+        /* IMPORTANTE — no cambiar este evento a "loadeddata":
+           el video solo se hace visible (clase "is-ready") cuando YA se
+           está reproduciendo de verdad ("playing"), nunca antes. Mientras
+           tanto se queda transparente y se ve la imagen de respaldo de
+           abajo (mismo oscurecido, textos y botones del hero). Así, si el
+           autoplay llega a estar bloqueado (por ejemplo con el Modo de
+           Bajo Consumo de iPhone activado), nunca se llega a ver un
+           fotograma pausado ni un botón de reproducir — sencillamente se
+           queda la imagen, sin ningún control ni interfaz de video. Si el
+           video sí arranca (al cargar, o más tarde tras una interacción
+           real), aparece con un fundido suave, sin saltos. */
+        hv.addEventListener('playing', function () {
           hv.classList.add('is-ready');
-        }, { once: true });
+          hv.style.display = '';
+        });
         hv.muted = true;
         hv.defaultMuted = true;
+        hv.playsInline = true;
         hv.setAttribute('webkit-playsinline', '');
         /* En iPhone/Safari (y algunos otros navegadores móviles) un solo
-           intento automático de reproducir a veces no alcanza y el video
-           se queda pausado, como esperando que alguien le dé play. Por eso
-           se reintenta en varios momentos: apenas se prepara, cuando ya
-           tiene datos, cuando puede reproducirse sin cortes, cuando el hero
+           intento automático de reproducir a veces no alcanza. Por eso se
+           reintenta en varios momentos: apenas se prepara, cuando ya tiene
+           datos, cuando puede reproducirse sin cortes, cuando el hero
            entra en pantalla, si la persona vuelve a la pestaña, y ante el
            primer toque/clic/scroll en la página. */
-        var avisoAutoplay = false;
         var intentarReproducir = function () {
           if (!hv.paused) return;
           var intento = hv.play();
           if (intento && typeof intento.catch === 'function') {
-            intento.catch(function (err) {
-              if (!avisoAutoplay) {
-                avisoAutoplay = true;
-                if (window.console && console.warn) {
-                  console.warn('No se pudo iniciar el video automáticamente (se reintentará):', err);
-                }
-              }
-            });
+            intento.catch(function () { /* autoplay bloqueado; se reintenta o se deja la imagen de respaldo */ });
           }
         };
         hv.load();
@@ -142,6 +139,13 @@
           }, { threshold: 0.1 });
           ioHeroVideo.observe(hv);
         }
+        /* Red de seguridad: si tras unos segundos el video sigue sin
+           arrancar (autoplay bloqueado y la persona todavía no interactuó
+           con la página), se oculta por completo — no solo transparente —
+           para no dejar ningún elemento de video sobre la imagen. */
+        setTimeout(function () {
+          if (hv.paused) hv.style.display = 'none';
+        }, 2500);
       } else {
         hv.style.display = 'none';
       }
