@@ -343,7 +343,7 @@ const CONTENIDO = {
   /* ---------- GALERÍA ----------
      Agrega rutas de fotos: "img/galeria-01.jpg". null = placeholder. */
   galeria: [
-    { foto: "img/torre-dia.jpg",         titulo: "Fachada" },
+    { foto: "img/galeria-fachada.jpg",  titulo: "Fachada" },
     { foto: "img/lobby-panoramico.jpg",  titulo: "Lobby" },
     { foto: "img/oficina-vista.jpg",     titulo: "Vista desde oficina" },
     { foto: "img/torre-atardecer.jpg",   titulo: "Torre al atardecer" },
