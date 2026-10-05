@@ -202,8 +202,15 @@
   /* =========================================================
      OFICINAS
      ========================================================= */
-  var filtroActual = 'todas';
-  var rangoActual = null;
+  /* Filtro por metraje. Rangos sin solapes:
+     94–350 (ambos inclusive) · más de 350 hasta 650 · más de 650 hasta 1,022 */
+  var rangoActual = '94-350';
+
+  function enRango(m2, rango) {
+    var p = rango.split('-'), min = +p[0], max = +p[1];
+    var okMin = (min === 94) ? m2 >= min : m2 > min;
+    return okMin && m2 <= max;
+  }
 
   function fotosDe(o) {
     if (o.fotos && o.fotos.length) return o.fotos;
@@ -240,26 +247,16 @@
     var cont = slot('oficinas'); if (!cont) return;
 
     listaActual = C.oficinas.filter(function (o) {
-      var okFiltro = filtroActual === 'todas' ||
-                     (filtroActual === 'disponible' && o.estado === 'disponible') ||
-                     o.tipo === filtroActual ||
-                     (o.caracteristicas && o.caracteristicas.indexOf(filtroActual) !== -1);
-      var okRango = true;
-      if (rangoActual) {
-        var p = rangoActual.split('-');
-        okRango = o.m2 >= +p[0] && o.m2 <= +p[1];
-      }
-      return okFiltro && okRango;
+      return enRango(+o.m2, rangoActual);
     });
 
     cont.innerHTML = listaActual.length
       ? listaActual.map(fichaHTML).join('')
-      : '<p class="empty">No hay oficinas que coincidan con ese filtro. <a href="#contacto">Escríbanos</a> y le buscamos una opción.</p>';
+      : '<p class="empty">No hay oficinas disponibles en este rango de metraje</p>';
 
     var cuenta = $('#filtroCount');
     if (cuenta) {
-      cuenta.textContent = listaActual.length + (listaActual.length === 1 ? ' oficina' : ' oficinas') +
-                           (rangoActual ? ' · ' + rangoActual.replace('-', ' – ') + ' m²' : '');
+      cuenta.textContent = listaActual.length ? listaActual.length + (listaActual.length === 1 ? ' oficina' : ' oficinas') : '';
     }
 
     $$('.listing', cont).forEach(function (art) {
@@ -482,21 +479,14 @@
     /* Filtros */
     $$('.filter').forEach(function (b) {
       b.addEventListener('click', function () {
-        $$('.filter').forEach(function (x) { x.classList.remove('is-active'); });
+        $$('.filter').forEach(function (x) {
+          x.classList.remove('is-active');
+          x.setAttribute('aria-pressed', 'false');
+        });
         b.classList.add('is-active');
-        filtroActual = b.getAttribute('data-filtro');
+        b.setAttribute('aria-pressed', 'true');
+        rangoActual = b.getAttribute('data-rango');
         pintarOficinas();
-      });
-    });
-
-    /* Chips del hero: filtran por metraje y bajan al catálogo */
-    $$('.chip').forEach(function (c) {
-      c.addEventListener('click', function () {
-        rangoActual = (rangoActual === c.getAttribute('data-rango')) ? null : c.getAttribute('data-rango');
-        filtroActual = 'todas';
-        $$('.filter').forEach(function (x) { x.classList.toggle('is-active', x.getAttribute('data-filtro') === 'todas'); });
-        pintarOficinas();
-        document.getElementById('oficinas').scrollIntoView({ behavior: 'smooth' });
       });
     });
 
