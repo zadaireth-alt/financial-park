@@ -750,7 +750,7 @@ h1.hero-title-logo{
 .to-top:hover{ background:var(--blue); }
 
 /* ---------- Reveal ---------- */
-.reveal{ opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease; }
+.reveal{ opacity:0; transform:translateY(16px); transition:opacity .4s cubic-bezier(.2,.7,.2,1), transform .4s cubic-bezier(.2,.7,.2,1); }
 .reveal.in{ opacity:1; transform:none; }
 
 /* =====================================================
@@ -812,4 +812,180 @@ h1.hero-title-logo{
 @media (prefers-reduced-motion: reduce){
   html{ scroll-behavior:auto; }
   .reveal{ opacity:1; transform:none; transition:none; }
+}
+
+/* =====================================================
+   INTERACCIONES Y ANIMACIONES (suaves, 200–400 ms)
+   ===================================================== */
+:root{ --ease-out:cubic-bezier(.2,.7,.2,1); }
+
+/* Botones: elevación sutil al pasar el mouse y respuesta al hacer click */
+.btn{ transition:background .25s ease, color .25s ease, border-color .25s ease, transform .2s var(--ease-out), box-shadow .25s ease; }
+.btn-primary:hover{ box-shadow:0 10px 24px rgba(44,95,158,.28); }
+.btn:active, .filter:active{ transform:translateY(0) scale(.98); }
+.btn:focus-visible, .filter:focus-visible{ outline:2px solid var(--blue); outline-offset:3px; }
+.filter{ transition:background .2s ease, border-color .2s ease, color .2s ease, transform .2s var(--ease-out); }
+.filter:hover{ transform:translateY(-1px); }
+
+/* Fichas de oficina: la animación de entrada no anula el efecto hover */
+.listing.reveal{ transition:opacity .4s var(--ease-out), transform .3s var(--ease-out), box-shadow .3s ease; }
+.listing.reveal.in:hover, .listing.reveal.in:focus-visible{ transform:translateY(-6px); }
+.listing-media img{ transition:transform .4s var(--ease-out), opacity .4s ease; }
+
+/* Al cambiar de filtro: fundido corto con pequeño desplazamiento */
+@keyframes fpFadeUp{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:none; } }
+.swap-in{ animation:fpFadeUp .32s var(--ease-out) both; }
+
+/* Modal de oficina y sus fotos: apertura más fluida */
+.oficina-modal-panel{ transform:translateY(14px) scale(.985); transition:transform .3s var(--ease-out); }
+.oficina-modal.is-open .oficina-modal-panel{ transform:none; }
+
+/* ---------- Plano interactivo (El edificio) ---------- */
+:root{ --ease-card:cubic-bezier(.22,1,.36,1); }
+.plano{ position:relative; }
+.plano-stage{
+  position:relative;
+  max-width:980px;
+  margin:0 auto;
+  border-radius:var(--r-card);
+  overflow:hidden;
+  background:#fff;
+  border:1px solid var(--line);
+}
+.plano-img{ width:100%; height:auto; display:block; }
+.plano-zonas{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+
+/* Zona del local: invisible en reposo; al activarse, relleno azul tenue,
+   contorno fino y un halo suave (sin bordes duros). */
+.plano-zona{
+  fill:var(--blue);
+  fill-opacity:0;
+  stroke:var(--blue);
+  stroke-opacity:0;
+  stroke-width:1.25;
+  vector-effect:non-scaling-stroke;
+  stroke-linejoin:round;
+  cursor:pointer;
+  outline:none;
+  transition:fill-opacity .25s var(--ease-card), stroke-opacity .25s var(--ease-card);
+}
+/* La zona solo detecta el cursor; el efecto visual lo hace la capa de elevación */
+.plano-zona.is-active{ fill-opacity:0; stroke-opacity:0; }
+.plano-zona:focus-visible{ stroke-opacity:.9; stroke-width:1.5; }
+
+/* Elevación del local: copia recortada con su forma exacta que se ilumina,
+   sube unos píxeles y proyecta una sombra suave. El plano base no se mueve. */
+.plano-lift{
+  pointer-events:none;
+  opacity:0;
+  transform:translateY(0);
+  transition:opacity .3s var(--ease-card), transform .3s var(--ease-card);
+}
+.plano-lift.is-active{ opacity:1; transform:translateY(-7px); }
+.plano-lift-luz{
+  fill:#fff; fill-opacity:.14;
+  stroke:var(--blue); stroke-opacity:.45; stroke-width:1;
+  vector-effect:non-scaling-stroke; stroke-linejoin:round;
+}
+
+/* Entrada del plano: fundido y acercamiento suave (0.97 → 1) */
+.plano-stage.reveal{ transform:scale(.97); transition:opacity .35s var(--ease-card), transform .35s var(--ease-card); }
+.plano-stage.reveal.in{ transform:none; }
+
+/* Tarjeta flotante: siempre foto arriba (≈260 × 170) y nombre debajo */
+.plano-card{
+  position:absolute; z-index:20; top:0; left:0;
+  width:276px;
+  padding:8px;
+  background:#fff;
+  border-radius:16px;
+  border:1px solid rgba(15,35,64,.06);
+  box-shadow:0 12px 32px rgba(15,35,64,.14), 0 2px 6px rgba(15,35,64,.05);
+  opacity:0;
+  transform:translateY(10px) scale(.96);
+  transform-origin:center top;
+  transition:opacity .3s var(--ease-card), transform .3s var(--ease-card);
+  will-change:opacity, transform;
+}
+.plano-card.is-open{ opacity:1; transform:none; }
+/* Cierre suave */
+.plano-card:not(.is-open){ transition-duration:.25s; }
+/* Al cambiar de local, la tarjeta se desliza (sin seguir al cursor) */
+.plano-card.is-moving{
+  transition:opacity .3s var(--ease-card), transform .3s var(--ease-card),
+             left .3s var(--ease-card), top .3s var(--ease-card);
+}
+
+@keyframes planoSwap{ from{ opacity:0; transform:translateY(3px); } to{ opacity:1; transform:none; } }
+.plano-card-inner.is-swap{ animation:planoSwap .2s var(--ease-card) both; }
+
+.plano-card-media{
+  position:relative;
+  width:100%;
+  aspect-ratio:26/17;
+  border-radius:10px;
+  overflow:hidden;
+  background:var(--soft);
+}
+.plano-card-media img{ width:100%; height:100%; object-fit:cover; display:block; }
+/* Foto aún no subida: se conserva el espacio con un fondo neutro y el ícono del edificio */
+.plano-card-media.is-empty{
+  background:
+    linear-gradient(135deg, #eef2f7 0%, #e3e9f1 100%);
+}
+.plano-card-media.is-empty::after{
+  content:"";
+  position:absolute; left:50%; top:50%;
+  width:34px; height:34px; margin:-17px 0 0 -17px;
+  opacity:.35;
+  background:var(--navy);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5M9 10h.01M15 10h.01M9 13.5h.01M15 13.5h.01'/%3E%3C/svg%3E") center/contain no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5M9 10h.01M15 10h.01M9 13.5h.01M15 13.5h.01'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+.plano-card-body{ padding:12px 8px 6px; }
+.plano-card-nombre{
+  margin:0;
+  font-family:var(--display); font-weight:600; font-size:1.02rem; line-height:1.25;
+  letter-spacing:-0.01em; color:var(--navy);
+}
+.plano-card-estado{
+  display:inline-flex; align-items:center; gap:6px;
+  margin-top:5px;
+  font-size:.66rem; font-weight:500; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--muted);
+}
+.plano-card-estado::before{ content:""; width:6px; height:6px; border-radius:50%; background:var(--muted); }
+.plano-card-estado.operacion::before{ background:var(--green); }
+.plano-card-estado.proximamente{ color:var(--amber); }
+.plano-card-estado.proximamente::before{ background:var(--amber); }
+
+.plano-card-close{
+  position:absolute; top:14px; right:14px; z-index:2;
+  width:30px; height:30px; border-radius:50%; border:0;
+  background:rgba(15,35,64,.72); color:#fff; font-size:.8rem;
+  cursor:pointer; display:none; align-items:center; justify-content:center;
+  transition:background .2s ease;
+}
+.plano-card-close:hover{ background:var(--navy); }
+
+/* Celular / pantallas táctiles: la misma tarjeta (foto + nombre) se abre
+   al tocar el local, fija abajo y con botón de cerrar visible. */
+@media (hover:none), (max-width:760px){
+  .plano-card{
+    position:fixed; left:12px !important; right:12px; bottom:calc(12px + env(safe-area-inset-bottom, 0px)); top:auto !important;
+    width:auto; max-width:360px; margin:0 auto;
+    transform:translateY(10px) scale(.96);
+    transform-origin:center bottom;
+    z-index:120;
+  }
+  .plano-card.is-open{ transform:none; }
+  .plano-card-close{ display:flex; }
+  .plano-card-media{ max-height:34vh; }
+}
+
+/* Respeta "reducir movimiento" del dispositivo: sin desplazamientos */
+@media (prefers-reduced-motion: reduce){
+  .reveal, .swap-in, .plano-card, .oficina-modal-panel, .plano-lift, .plano-stage{ transform:none !important; }
+  .swap-in, .plano-card-inner.is-swap{ animation:none; }
+  *, *::before, *::after{ transition-duration:.01ms !important; animation-duration:.01ms !important; scroll-behavior:auto !important; }
 }
