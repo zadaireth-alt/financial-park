@@ -254,6 +254,15 @@
       ? listaActual.map(fichaHTML).join('')
       : '<p class="empty">No hay oficinas disponibles en este rango de metraje</p>';
 
+    /* Entrada suave: la primera vez al hacer scroll (reveal); al cambiar
+       de filtro, las fichas nuevas aparecen con un fundido corto. */
+    $$('.listing, .empty', cont).forEach(function (el, i) {
+      if (!oficinasPintadas) { el.classList.add('reveal'); return; }
+      el.style.animationDelay = Math.min(i, 6) * 40 + 'ms';
+      el.classList.add('swap-in');
+    });
+    oficinasPintadas = true;
+
     var cuenta = $('#filtroCount');
     if (cuenta) {
       cuenta.textContent = listaActual.length ? listaActual.length + (listaActual.length === 1 ? ' oficina' : ' oficinas') : '';
@@ -270,6 +279,7 @@
     observar(cont);
   }
   var listaActual = [];
+  var oficinasPintadas = false;
 
   function pintarSelectOficinas() {
     var sel = slot('select-oficinas'); if (!sel) return;
@@ -409,6 +419,248 @@
     observar(cont);
   }
 
+  /* ---------- Plano interactivo (sección "El edificio") ----------
+     Zonas invisibles con la forma real de cada local. Computadora: al pasar
+     el mouse se ilumina el local y aparece una tarjeta estable a su lado; se
+     cierra al salir del local y de la tarjeta. Celular: se abre al tocar. */
+  function pintarPlano() {
+    var cont = slot('plano');
+    var P = C.plano;
+    if (!cont || !P) return;
+
+    var SVGNS = 'http://www.w3.org/2000/svg';
+    var ESTADOS = { operacion: 'En operación', proximamente: 'Próximamente' };
+    var tactil = window.matchMedia('(hover: none), (max-width: 760px)');
+
+    cont.innerHTML =
+      '<div class="plano-stage reveal">' +
+        '<img class="plano-img" src="' + P.imagen + '" alt="' + esc(P.alt) + '" width="' + P.ancho + '" height="' + P.alto + '">' +
+      '</div>' +
+      '<div class="plano-card" role="dialog" aria-modal="false" aria-labelledby="planoCardTitulo" hidden>' +
+        '<button type="button" class="plano-card-close" aria-label="Cerrar">✕</button>' +
+        '<div class="plano-card-inner"></div>' +
+      '</div>';
+
+    var stage = $('.plano-stage', cont);
+    var card = $('.plano-card', cont);
+    var inner = $('.plano-card-inner', card);
+
+    /* Capa SVG con el mismo sistema de coordenadas que la imagen (viewBox):
+       las zonas escalan con el plano y quedan siempre alineadas. */
+    var svg = document.createElementNS(SVGNS, 'svg');
+    svg.setAttribute('class', 'plano-zonas');
+    svg.setAttribute('viewBox', '0 0 ' + P.ancho + ' ' + P.alto);
+    svg.setAttribute('preserveAspectRatio', 'none');
+    svg.setAttribute('role', 'group');
+    svg.setAttribute('aria-label', 'Locales en el plano');
+    /* Capa de "elevación": para cada local, una copia del plano recortada
+       exactamente con su forma (clipPath). Al activarse se ilumina, sube unos
+       píxeles y proyecta una sombra suave; el plano base no se mueve. */
+    var defs = document.createElementNS(SVGNS, 'defs');
+    defs.innerHTML =
+      '<filter id="planoLift" x="-20%" y="-20%" width="140%" height="150%" color-interpolation-filters="sRGB">' +
+        '<feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0f2340" flood-opacity=".28"/>' +
+        '<feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#2c5f9e" flood-opacity=".25"/>' +
+      '</filter>';
+    var base = document.createElementNS(SVGNS, 'image');
+    base.setAttribute('id', 'planoBase');
+    base.setAttribute('width', P.ancho);
+    base.setAttribute('height', P.alto);
+    base.setAttribute('preserveAspectRatio', 'none');
+    base.setAttribute('href', P.imagen);
+    defs.appendChild(base);
+    svg.appendChild(defs);
+    var capaLift = document.createElementNS(SVGNS, 'g');
+    capaLift.setAttribute('class', 'plano-lifts');
+    capaLift.setAttribute('aria-hidden', 'true');
+    svg.appendChild(capaLift);
+    stage.appendChild(svg);
+
+    var zonas = {}, lifts = {}, porId = {};
+    P.locales.forEach(function (l) {
+      var clip = document.createElementNS(SVGNS, 'clipPath');
+      clip.setAttribute('id', 'planoClip-' + l.id);
+      var forma = document.createElementNS(SVGNS, 'polygon');
+      forma.setAttribute('points', l.zona);
+      clip.appendChild(forma);
+      defs.appendChild(clip);
+
+      var g = document.createElementNS(SVGNS, 'g');
+      g.setAttribute('class', 'plano-lift');
+      var cuerpo = document.createElementNS(SVGNS, 'g');
+      cuerpo.setAttribute('filter', 'url(#planoLift)');
+      var copia = document.createElementNS(SVGNS, 'use');
+      copia.setAttribute('href', '#planoBase');
+      copia.setAttribute('clip-path', 'url(#planoClip-' + l.id + ')');
+      cuerpo.appendChild(copia);
+      var luz = document.createElementNS(SVGNS, 'polygon');
+      luz.setAttribute('points', l.zona);
+      luz.setAttribute('class', 'plano-lift-luz');
+      g.appendChild(cuerpo);
+      g.appendChild(luz);
+      capaLift.appendChild(g);
+      lifts[l.id] = g;
+
+      var poly = document.createElementNS(SVGNS, 'polygon');
+      poly.setAttribute('points', l.zona);
+      poly.setAttribute('class', 'plano-zona');
+      poly.setAttribute('tabindex', '0');
+      poly.setAttribute('role', 'button');
+      poly.setAttribute('aria-label', l.nombre + ', ' + ESTADOS[l.estado]);
+      poly.setAttribute('data-id', l.id);
+      svg.appendChild(poly);
+      zonas[l.id] = poly;
+      porId[l.id] = l;
+    });
+
+    function resaltar(id, on) {
+      zonas[id].classList.toggle('is-active', on);
+      lifts[id].classList.toggle('is-active', on);
+      // el local que se activa se dibuja por encima de los demás mientras sube
+      if (on) capaLift.appendChild(lifts[id]);
+    }
+
+    var activo = null, tOcultar = null, tCerrar = null, conPuntero = false;
+    // Precarga las fotos la primera vez que el cursor entra al plano (sin saltos al abrir)
+    stage.addEventListener('pointerenter', function () {
+      P.locales.forEach(function (l) { if (l.foto) { var im = new Image(); im.src = l.foto; } });
+    }, { once: true });
+    svg.addEventListener('pointerdown', function () {
+      conPuntero = true; setTimeout(function () { conPuntero = false; }, 500);
+    });
+
+    function contenido(l) {
+      var media = l.foto
+        ? '<img src="' + l.foto + '" alt="' + esc(l.nombre) + '" width="520" height="340">'
+        : '';
+      inner.innerHTML =
+        '<div class="plano-card-media' + (l.foto ? '' : ' is-empty') + '">' + media + '</div>' +
+        '<div class="plano-card-body">' +
+          '<p class="plano-card-nombre" id="planoCardTitulo">' + esc(l.nombre) + '</p>' +
+          '<span class="plano-card-estado ' + l.estado + '">' + ESTADOS[l.estado] + '</span>' +
+        '</div>';
+      // Si la foto aún no está subida, se conserva el espacio con fondo neutro
+      var img = $('img', inner);
+      if (img) img.addEventListener('error', function () {
+        img.parentNode.classList.add('is-empty'); img.remove();
+      }, { once: true });
+    }
+
+    /* Busca, alrededor del local, la posición que no tape el local (ni su
+       nombre), quede dentro de la pantalla y cubra lo menos posible a los
+       vecinos. Se calcula una sola vez por local: la tarjeta no sigue al cursor. */
+    function posicionar(id) {
+      if (tactil.matches) { card.style.left = ''; card.style.top = ''; return; }
+      var base = cont.getBoundingClientRect();
+      var rel = function (r) { return { l: r.left - base.left, r: r.right - base.left, t: r.top - base.top, b: r.bottom - base.top }; };
+      var z = rel(zonas[id].getBoundingClientRect());
+      var cw = card.offsetWidth, ch = card.offsetHeight, m = 12;
+      var minX = Math.max(0, 8 - base.left), maxX = Math.min(base.width, window.innerWidth - base.left - 8) - cw;
+      var minY = Math.max(0, 92 - base.top), maxY = Math.min(base.height, window.innerHeight - base.top - 12) - ch;
+      if (maxY < minY) { minY = 0; maxY = base.height - ch; }
+      var midY = (z.t + z.b) / 2 - ch / 2, midX = (z.l + z.r) / 2 - cw / 2;
+      var cand = [
+        { x: z.r + m, y: midY }, { x: z.l - m - cw, y: midY },
+        { x: z.r + m, y: z.t }, { x: z.l - m - cw, y: z.t },
+        { x: midX, y: z.b + m }, { x: midX, y: z.t - m - ch },
+        { x: z.r + m, y: z.b - ch }, { x: z.l - m - cw, y: z.b - ch }
+      ];
+      var otros = Object.keys(zonas).filter(function (k) { return k !== id; })
+        .map(function (k) { return rel(zonas[k].getBoundingClientRect()); });
+      function solape(a, b) {
+        return Math.max(0, Math.min(a.r, b.r) - Math.max(a.l, b.l)) * Math.max(0, Math.min(a.b, b.b) - Math.max(a.t, b.t));
+      }
+      var mejor = null;
+      cand.forEach(function (c, i) {
+        var x = Math.min(Math.max(c.x, minX), Math.max(minX, maxX));
+        var y = Math.min(Math.max(c.y, minY), Math.max(minY, maxY));
+        var box = { l: x, r: x + cw, t: y, b: y + ch };
+        if (solape(box, z) > 0) return;                       // nunca encima del local
+        var costo = i * 400;                                    // preferencia por orden
+        otros.forEach(function (o) { costo += solape(box, o) * 0.6; });
+        costo += Math.abs(x - c.x) + Math.abs(y - c.y);         // mientras más cerca, mejor
+        if (!mejor || costo < mejor.costo) mejor = { x: x, y: y, costo: costo };
+      });
+      if (!mejor) mejor = { x: Math.min(Math.max(z.r + m, minX), maxX), y: Math.min(Math.max(midY, minY), maxY) };
+      card.style.left = Math.round(mejor.x) + 'px';
+      card.style.top = Math.round(mejor.y) + 'px';
+    }
+
+    function abrir(id, foco) {
+      clearTimeout(tOcultar); clearTimeout(tCerrar);
+      var abierta = card.classList.contains('is-open') && activo;
+      if (activo === id && abierta) return;
+      if (activo) resaltar(activo, false);
+      activo = id;
+      resaltar(id, true);
+
+      if (abierta) {
+        // Cambio de local: la tarjeta se desliza al nuevo sitio y el contenido hace un fundido corto
+        card.classList.add('is-moving');
+        contenido(porId[id]);
+        posicionar(id);
+        inner.classList.remove('is-swap'); void inner.offsetWidth; inner.classList.add('is-swap');
+      } else {
+        card.classList.remove('is-moving', 'is-open');
+        contenido(porId[id]);
+        card.hidden = false;
+        posicionar(id);
+        void card.offsetWidth;            // fija el estado inicial antes de animar
+        card.classList.add('is-open');
+      }
+      if (foco) $('.plano-card-close', card).focus({ preventScroll: true });
+    }
+
+    function cerrar(devolverFoco) {
+      clearTimeout(tOcultar);
+      if (!activo) return;
+      var id = activo;
+      resaltar(id, false);
+      activo = null;
+      card.classList.remove('is-open', 'is-moving');
+      tCerrar = setTimeout(function () { if (!activo) card.hidden = true; }, 260);
+      if (devolverFoco) zonas[id].focus({ preventScroll: true });
+    }
+
+    function ocultarLuego() {
+      clearTimeout(tOcultar);
+      tOcultar = setTimeout(function () { cerrar(false); }, 200);
+    }
+
+    P.locales.forEach(function (l) {
+      var z = zonas[l.id];
+      z.addEventListener('mouseenter', function () { if (!tactil.matches) abrir(l.id); });
+      z.addEventListener('mouseleave', function () { if (!tactil.matches) ocultarLuego(); });
+      z.addEventListener('click', function () {
+        if (tactil.matches && activo === l.id) { cerrar(false); return; }
+        abrir(l.id);
+      });
+      z.addEventListener('focus', function () { if (!conPuntero) abrir(l.id); });
+      z.addEventListener('blur', function () {
+        setTimeout(function () {
+          if (activo === l.id && !card.contains(document.activeElement) && !z.matches(':hover')) cerrar(false);
+        }, 0);
+      });
+      z.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrir(l.id, tactil.matches); }
+      });
+    });
+
+    // Mientras el cursor esté sobre la tarjeta, se mantiene abierta
+    card.addEventListener('mouseenter', function () { if (!tactil.matches) clearTimeout(tOcultar); });
+    card.addEventListener('mouseleave', function () { if (!tactil.matches) ocultarLuego(); });
+    $('.plano-card-close', card).addEventListener('click', function () { cerrar(true); });
+
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && activo) cerrar(true); });
+    document.addEventListener('click', function (e) {
+      if (!activo || card.contains(e.target) || (e.target.closest && e.target.closest('.plano-zona'))) return;
+      cerrar(false);
+    });
+    window.addEventListener('resize', function () { if (activo) { card.classList.remove('is-moving'); posicionar(activo); } });
+
+    observar(cont);
+  }
+
   /* ---------- Ubicación ---------- */
   function pintarUbicacion() {
     var U = C.ubicacion;
@@ -505,7 +757,7 @@
         entries.forEach(function (e, i) {
           if (e.isIntersecting) {
             var el = e.target;
-            setTimeout(function () { el.classList.add('in'); }, i * 70);
+            setTimeout(function () { el.classList.add('in'); }, Math.min(i, 4) * 60);
             io.unobserve(el);
           }
         });
@@ -527,9 +779,12 @@
   pintarOficinas();
   pintarSelectOficinas();
   pintarAmenidades();
+  pintarPlano();
   pintarUbicacion();
   pintarGaleria();
   pintarDesarrollador();
   interacciones();
+  /* Títulos y fotos de cada sección aparecen suavemente al entrar en pantalla */
+  $$('.section-head, .split-media, .bleed').forEach(function (el) { el.classList.add('reveal'); });
   observar();
 })();
