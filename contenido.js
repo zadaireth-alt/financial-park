@@ -337,7 +337,7 @@ const CONTENIDO = {
     ],
     servicios: "Oficinas · Residencial · Centros comerciales · Cines · Hotelería",
     // Fotos del desarrollador (opcional). Deja [] para no mostrar nada.
-    fotos: ["img/desarrollo-bahia-1.jpg", "img/desarrollo-bahia-2.jpg"]
+    fotos: ["img/desarrollo-bahia-1.jpg"]
   },
 
   /* ---------- GALERÍA ----------
