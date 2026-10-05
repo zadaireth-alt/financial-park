@@ -661,6 +661,17 @@ h1.hero-title-logo{
 }
 .dev-photo{ border-radius:var(--r-card); overflow:hidden; aspect-ratio:16/10; }
 .dev-photo img{ width:100%; height:100%; object-fit:cover; }
+/* Una sola foto: centrada, ~20% más grande que una de las dos columnas, completa (sin recorte) */
+.dev-photo:only-child{
+  grid-column:1 / -1;
+  justify-self:center;
+  width:min(100%, calc((100% - clamp(14px, 2vw, 22px)) * 0.6));
+  aspect-ratio:auto;
+}
+.dev-photo:only-child img{ height:auto; object-fit:contain; display:block; }
+@media (max-width:640px){
+  .dev-photo:only-child{ width:100%; }
+}
 
 .services{
   margin:clamp(38px,5vw,62px) 0 0;
