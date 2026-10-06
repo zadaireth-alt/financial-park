@@ -191,8 +191,8 @@
   /* ---------- Barra de datos clave ---------- */
   function pintarDatos() {
     var cont = slot('datos-clave'); if (!cont) return;
-    cont.innerHTML = C.datosClave.map(function (d) {
-      return '<div class="databar-item">' +
+    cont.innerHTML = C.datosClave.map(function (d, i) {
+      return '<div class="databar-item" style="--i:' + i + '">' +
                '<p class="databar-val">' + d.valor + '</p>' +
                '<p class="databar-lab">' + d.etiqueta + '</p>' +
              '</div>';
@@ -693,10 +693,9 @@
     txt('dev-texto', D.texto);
     txt('dev-servicios', D.servicios);
     html('dev-stats', D.stats.map(function (s) {
-      return '<div class="stat reveal"><p class="stat-num">' + s.valor + '</p>' +
+      return '<div class="stat"><p class="stat-num"><span class="stat-cifra">' + s.valor + '</span></p>' +
              '<p class="stat-label">' + s.etiqueta + '</p></div>';
     }).join(''));
-    observar(slot('dev-stats'));
 
     var fotosCont = slot('dev-fotos');
     if (fotosCont) {
@@ -771,6 +770,64 @@
   }
 
   /* =========================================================
+     FRANJA DE DATOS Y CONTADORES (se activan una sola vez al entrar en pantalla)
+     ========================================================= */
+  var sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function alEntrar(el, fn) {
+    if (!el) return;
+    if (sinMovimiento || !('IntersectionObserver' in window)) { fn(true); return; }
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { obs.disconnect(); fn(false); }
+      });
+    }, { threshold: 0.35 });
+    obs.observe(el);
+  }
+
+  /* Franja debajo del video: aparición escalonada de izquierda a derecha */
+  function animarFranja() {
+    var barra = $('.databar');
+    if (!barra) return;
+    barra.classList.add('anim-ready');
+    alEntrar(barra, function () { barra.classList.add('is-in'); });
+  }
+
+  /* Contadores de Desarrollo Bahía: 0 → valor final en ~2 s, desacelerando.
+     Conserva el signo "+", las comas de miles y las unidades ("m²"). */
+  function animarContadores() {
+    var cont = slot('dev-stats');
+    if (!cont) return;
+    var cifras = $$('.stat-cifra', cont).map(function (el) {
+      var txt = el.textContent;
+      var m = txt.match(/^(\D*)([\d,]+)(.*)$/);
+      if (!m) return null;
+      return { el: el, pre: m[1], fin: parseInt(m[2].replace(/,/g, ''), 10), suf: m[3], txt: txt };
+    }).filter(Boolean);
+    cont.classList.add('anim-ready');
+
+    alEntrar(cont, function (directo) {
+      cont.classList.add('is-in');
+      if (directo) return;                      // movimiento reducido: valores finales tal cual
+      var dur = 2000, t0 = null;
+      var fmt = function (n) { return n.toLocaleString('en-US'); };
+      // Reserva el ancho del valor final para que nada se mueva mientras cuenta
+      cifras.forEach(function (c) { c.el.style.minWidth = c.el.getBoundingClientRect().width + 'px'; });
+      cifras.forEach(function (c) { c.el.textContent = c.pre + '0' + c.suf; });
+      function paso(t) {
+        if (!t0) t0 = t;
+        var p = Math.min(1, (t - t0) / dur);
+        var e = 1 - Math.pow(1 - p, 3);         // desaceleración suave al final
+        cifras.forEach(function (c) {
+          c.el.textContent = p < 1 ? c.pre + fmt(Math.round(c.fin * e)) + c.suf : c.txt;
+        });
+        if (p < 1) requestAnimationFrame(paso);
+      }
+      requestAnimationFrame(paso);
+    });
+  }
+
+  /* =========================================================
      ARRANQUE
      ========================================================= */
   pintarBase();
@@ -783,6 +840,8 @@
   pintarUbicacion();
   pintarGaleria();
   pintarDesarrollador();
+  animarFranja();
+  animarContadores();
   interacciones();
   /* Títulos y fotos de cada sección aparecen suavemente al entrar en pantalla */
   $$('.section-head, .split-media, .bleed').forEach(function (el) { el.classList.add('reveal'); });
