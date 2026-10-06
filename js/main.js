@@ -531,7 +531,10 @@
 
     function contenido(l) {
       var media = l.foto
-        ? '<img src="' + l.foto + '" alt="' + esc(l.nombre) + '" width="520" height="340">'
+        ? '<button type="button" class="plano-card-zoom" aria-label="Ampliar foto de ' + esc(l.nombre) + '">' +
+            '<img src="' + l.foto + '" alt="' + esc(l.nombre) + '" width="520" height="340">' +
+            '<span class="plano-card-zoom-ico" aria-hidden="true"></span>' +
+          '</button>'
         : '';
       inner.innerHTML =
         '<div class="plano-card-media' + (l.foto ? '' : ' is-empty') + '">' + media + '</div>' +
@@ -542,9 +545,74 @@
       // Si la foto aún no está subida, se conserva el espacio con fondo neutro
       var img = $('img', inner);
       if (img) img.addEventListener('error', function () {
-        img.parentNode.classList.add('is-empty'); img.remove();
+        var media = img.closest('.plano-card-media');
+        media.classList.add('is-empty'); media.innerHTML = '';
       }, { once: true });
+      // Clic (o toque) en la foto: se abre ampliada en el visor
+      var zoom = $('.plano-card-zoom', inner);
+      if (zoom) zoom.addEventListener('click', function (e) {
+        e.stopPropagation();
+        abrirVisor(l, zoom);
+      });
     }
+
+    /* ---------- Visor de foto ampliada (lightbox) ----------
+       Muestra la foto completa (sin recorte ni deformación), máx. 90 % de la
+       pantalla, con el nombre debajo. Se cierra con ×, clic fuera o Escape,
+       y la página queda exactamente donde estaba. */
+    var visor = document.createElement('div');
+    visor.className = 'plano-visor';
+    visor.setAttribute('role', 'dialog');
+    visor.setAttribute('aria-modal', 'true');
+    visor.setAttribute('aria-labelledby', 'planoVisorNombre');
+    visor.hidden = true;
+    visor.innerHTML =
+      '<button type="button" class="plano-visor-close" aria-label="Cerrar foto ampliada">×</button>' +
+      '<figure class="plano-visor-fig">' +
+        '<img class="plano-visor-img" alt="">' +
+        '<figcaption class="plano-visor-nombre" id="planoVisorNombre"></figcaption>' +
+      '</figure>';
+    document.body.appendChild(visor);
+    var visorImg = $('.plano-visor-img', visor);
+    var visorNombre = $('.plano-visor-nombre', visor);
+    var visorAbierto = false, visorOrigen = null, visorScroll = 0, tVisor = null;
+
+    function abrirVisor(l, origen) {
+      clearTimeout(tVisor); clearTimeout(tOcultar);
+      visorOrigen = origen;
+      visorScroll = window.scrollY;
+      visorNombre.textContent = l.nombre;
+      visorImg.alt = l.nombre;
+      // Versión completa si existe; si no, la misma foto de la tarjeta
+      visorImg.onerror = function () { if (l.fotoGrande && visorImg.getAttribute('src') !== l.foto) visorImg.src = l.foto; };
+      visorImg.src = l.fotoGrande || l.foto;
+      visor.hidden = false;
+      void visor.offsetWidth;
+      visor.classList.add('is-open');
+      document.body.classList.add('modal-open');
+      visorAbierto = true;
+      $('.plano-visor-close', visor).focus({ preventScroll: true });
+    }
+
+    function cerrarVisor() {
+      if (!visorAbierto) return;
+      visorAbierto = false;
+      visor.classList.remove('is-open');
+      document.body.classList.remove('modal-open');
+      if (window.scrollY !== visorScroll) window.scrollTo(0, visorScroll);
+      tVisor = setTimeout(function () { if (!visorAbierto) { visor.hidden = true; visorImg.removeAttribute('src'); } }, 300);
+      if (visorOrigen && document.contains(visorOrigen)) visorOrigen.focus({ preventScroll: true });
+      // En computadora la tarjeta sigue abierta si el cursor quedó sobre ella o el local
+      if (!tactil.matches && activo && !card.matches(':hover') && !zonas[activo].matches(':hover')) ocultarLuego();
+    }
+
+    $('.plano-visor-close', visor).addEventListener('click', cerrarVisor);
+    visor.addEventListener('click', function (e) {
+      if (e.target === visor || e.target.classList.contains('plano-visor-fig')) cerrarVisor();
+    });
+    visor.addEventListener('keydown', function (e) {
+      if (e.key === 'Tab') { e.preventDefault(); $('.plano-visor-close', visor).focus({ preventScroll: true }); }
+    });
 
     /* Busca, alrededor del local, la posición que no tape el local (ni su
        nombre), quede dentro de la pantalla y cubra lo menos posible a los
@@ -624,7 +692,9 @@
 
     function ocultarLuego() {
       clearTimeout(tOcultar);
-      tOcultar = setTimeout(function () { cerrar(false); }, 200);
+      if (visorAbierto) return;           // con la foto ampliada, la tarjeta no se cierra
+      // Margen de tiempo para pasar del local a la tarjeta (y a su foto) sin que se cierre
+      tOcultar = setTimeout(function () { if (!visorAbierto) cerrar(false); }, 350);
     }
 
     P.locales.forEach(function (l) {
@@ -638,7 +708,7 @@
       z.addEventListener('focus', function () { if (!conPuntero) abrir(l.id); });
       z.addEventListener('blur', function () {
         setTimeout(function () {
-          if (activo === l.id && !card.contains(document.activeElement) && !z.matches(':hover')) cerrar(false);
+          if (activo === l.id && !visorAbierto && !card.contains(document.activeElement) && !z.matches(':hover')) cerrar(false);
         }, 0);
       });
       z.addEventListener('keydown', function (e) {
@@ -651,9 +721,14 @@
     card.addEventListener('mouseleave', function () { if (!tactil.matches) ocultarLuego(); });
     $('.plano-card-close', card).addEventListener('click', function () { cerrar(true); });
 
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && activo) cerrar(true); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      if (visorAbierto) { cerrarVisor(); return; }   // Escape cierra primero la foto ampliada
+      if (activo) cerrar(true);
+    });
     document.addEventListener('click', function (e) {
-      if (!activo || card.contains(e.target) || (e.target.closest && e.target.closest('.plano-zona'))) return;
+      if (!activo || visorAbierto || card.contains(e.target) || visor.contains(e.target) ||
+          (e.target.closest && e.target.closest('.plano-zona'))) return;
       cerrar(false);
     });
     window.addEventListener('resize', function () { if (activo) { card.classList.remove('is-moving'); posicionar(activo); } });
