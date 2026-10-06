@@ -1016,10 +1016,13 @@ h1.hero-title-logo{
 .plano-visor{
   position:fixed; inset:0; z-index:200;
   display:flex; align-items:center; justify-content:center;
-  background:rgba(8,18,34,.86);
-  -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+  background:rgba(8,18,34,.9);       /* sin desenfoque: el blur era lo que más trababa la animación */
   opacity:0;
-  transition:opacity .3s var(--ease-card);
+  transition:opacity .28s ease-out;
+  will-change:opacity;
+  contain:strict;
+  overscroll-behavior:contain;
+  touch-action:none;
   cursor:zoom-out;
 }
 .plano-visor.is-open{ opacity:1; }
@@ -1027,8 +1030,10 @@ h1.hero-title-logo{
 .plano-visor-fig{
   margin:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
   max-width:90vw; max-height:90vh;
-  transform:translateY(8px) scale(.96);
-  transition:transform .35s var(--ease-card);
+  transform:translate3d(0,10px,0) scale(.97);
+  transition:transform .34s var(--ease-card);
+  will-change:transform;
+  backface-visibility:hidden;
 }
 .plano-visor.is-open .plano-visor-fig{ transform:none; }
 .plano-visor-img{
