@@ -983,9 +983,25 @@ h1.hero-title-logo{
   .plano-card-media{ max-height:34vh; }
 }
 
+/* ---------- Franja de datos: aparición escalonada (500 ms, 120 ms entre bloques) ---------- */
+.databar.anim-ready .databar-item{
+  opacity:0;
+  transform:translateY(12px);
+  transition:opacity .5s var(--ease-card), transform .5s var(--ease-card);
+  transition-delay:calc(var(--i, 0) * 120ms);
+}
+.databar.anim-ready.is-in .databar-item{ opacity:1; transform:none; }
+
+/* ---------- Contadores de Desarrollo Bahía ---------- */
+.stat-num{ font-variant-numeric:tabular-nums; }
+.stat-cifra{ display:inline-block; text-align:center; white-space:nowrap; }
+.stats.anim-ready .stat-num{ opacity:0; transition:opacity .4s ease; }
+.stats.anim-ready .stat-label{ opacity:0; transition:opacity .6s ease .35s; }
+.stats.anim-ready.is-in .stat-num, .stats.anim-ready.is-in .stat-label{ opacity:1; }
+
 /* Respeta "reducir movimiento" del dispositivo: sin desplazamientos */
 @media (prefers-reduced-motion: reduce){
-  .reveal, .swap-in, .plano-card, .oficina-modal-panel, .plano-lift, .plano-stage{ transform:none !important; }
+  .reveal, .swap-in, .plano-card, .oficina-modal-panel, .plano-lift, .plano-stage, .databar-item{ transform:none !important; }
   .swap-in, .plano-card-inner.is-swap{ animation:none; }
   *, *::before, *::after{ transition-duration:.01ms !important; animation-duration:.01ms !important; scroll-behavior:auto !important; }
 }
