@@ -548,6 +548,8 @@
         var media = img.closest('.plano-card-media');
         media.classList.add('is-empty'); media.innerHTML = '';
       }, { once: true });
+      // Prepara la foto completa en segundo plano: al ampliarla ya está lista
+      if (l.foto) precargarGrande(l);
       // Clic (o toque) en la foto: se abre ampliada en el visor
       var zoom = $('.plano-card-zoom', inner);
       if (zoom) zoom.addEventListener('click', function (e) {
@@ -576,31 +578,53 @@
     var visorImg = $('.plano-visor-img', visor);
     var visorNombre = $('.plano-visor-nombre', visor);
     var visorAbierto = false, visorOrigen = null, visorScroll = 0, tVisor = null;
+    var listas = {};   // fotos completas ya descargadas y decodificadas
+
+    function precargarGrande(l) {
+      var src = l.fotoGrande || l.foto;
+      if (listas[src]) return listas[src];
+      var im = new Image();
+      im.decoding = 'async';
+      im.src = src;
+      listas[src] = (im.decode ? im.decode() : new Promise(function (ok) { im.onload = ok; }))
+        .then(function () { return src; })
+        .catch(function () { return l.foto; });   // si falta la completa, se usa la de la tarjeta
+      return listas[src];
+    }
+
+    // Bloquea el desplazamiento sin quitar la barra de scroll (así la página no se reacomoda)
+    function frenarScroll(e) { if (visorAbierto) e.preventDefault(); }
+    visor.addEventListener('wheel', frenarScroll, { passive: false });
+    visor.addEventListener('touchmove', frenarScroll, { passive: false });
 
     function abrirVisor(l, origen) {
       clearTimeout(tVisor); clearTimeout(tOcultar);
       visorOrigen = origen;
       visorScroll = window.scrollY;
+      visorAbierto = true;
       visorNombre.textContent = l.nombre;
       visorImg.alt = l.nombre;
-      // Versión completa si existe; si no, la misma foto de la tarjeta
-      visorImg.onerror = function () { if (l.fotoGrande && visorImg.getAttribute('src') !== l.foto) visorImg.src = l.foto; };
-      visorImg.src = l.fotoGrande || l.foto;
-      visor.hidden = false;
-      void visor.offsetWidth;
-      visor.classList.add('is-open');
-      document.body.classList.add('modal-open');
-      visorAbierto = true;
-      $('.plano-visor-close', visor).focus({ preventScroll: true });
+      // La foto se muestra cuando ya está decodificada: la animación no se interrumpe
+      var espera = precargarGrande(l);
+      var limite = new Promise(function (ok) { setTimeout(function () { ok(null); }, 450); });
+      Promise.race([espera, limite]).then(function (src) {
+        if (!visorAbierto) return;
+        visorImg.src = src || l.fotoGrande || l.foto;
+        visor.hidden = false;
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { if (visorAbierto) visor.classList.add('is-open'); });
+        });
+        $('.plano-visor-close', visor).focus({ preventScroll: true });
+      });
+      if (l.fotoGrande) espera.then(function (src) { if (visorAbierto && src !== visorImg.getAttribute('src')) visorImg.src = src; });
     }
 
     function cerrarVisor() {
       if (!visorAbierto) return;
       visorAbierto = false;
       visor.classList.remove('is-open');
-      document.body.classList.remove('modal-open');
       if (window.scrollY !== visorScroll) window.scrollTo(0, visorScroll);
-      tVisor = setTimeout(function () { if (!visorAbierto) { visor.hidden = true; visorImg.removeAttribute('src'); } }, 300);
+      tVisor = setTimeout(function () { if (!visorAbierto) { visor.hidden = true; } }, 320);
       if (visorOrigen && document.contains(visorOrigen)) visorOrigen.focus({ preventScroll: true });
       // En computadora la tarjeta sigue abierta si el cursor quedó sobre ella o el local
       if (!tactil.matches && activo && !card.matches(':hover') && !zonas[activo].matches(':hover')) ocultarLuego();
@@ -611,6 +635,7 @@
       if (e.target === visor || e.target.classList.contains('plano-visor-fig')) cerrarVisor();
     });
     visor.addEventListener('keydown', function (e) {
+      if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].indexOf(e.key) > -1) e.preventDefault();
       if (e.key === 'Tab') { e.preventDefault(); $('.plano-visor-close', visor).focus({ preventScroll: true }); }
     });
 
