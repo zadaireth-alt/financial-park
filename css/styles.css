@@ -983,6 +983,84 @@ h1.hero-title-logo{
   .plano-card-media{ max-height:34vh; }
 }
 
+/* Foto de la tarjeta: se puede pulsar para verla ampliada */
+.plano-card-zoom{
+  all:unset; box-sizing:border-box;
+  position:absolute; inset:0; display:block;
+  cursor:zoom-in;
+  border-radius:inherit; overflow:hidden;
+}
+.plano-card-zoom img{ transition:transform .45s var(--ease-card); }
+.plano-card-zoom:hover img{ transform:scale(1.03); }
+.plano-card-zoom:focus-visible{ outline:2px solid var(--navy); outline-offset:-2px; }
+.plano-card-zoom-ico{
+  position:absolute; right:10px; bottom:10px;
+  width:30px; height:30px; border-radius:50%;
+  background:rgba(15,35,64,.62);
+  opacity:0; transform:scale(.9);
+  transition:opacity .25s var(--ease-card), transform .25s var(--ease-card);
+}
+.plano-card-zoom-ico::after{
+  content:""; position:absolute; inset:8px;
+  background:#fff;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7'/%3E%3C/svg%3E") center/contain no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+.plano-card-zoom:hover .plano-card-zoom-ico,
+.plano-card-zoom:focus-visible .plano-card-zoom-ico{ opacity:1; transform:none; }
+@media (hover:none), (max-width:760px){
+  .plano-card-zoom-ico{ opacity:1; transform:none; }   /* en celular se ve siempre: indica que se puede ampliar */
+}
+
+/* Visor de foto ampliada (lightbox) */
+.plano-visor{
+  position:fixed; inset:0; z-index:200;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(8,18,34,.86);
+  -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+  opacity:0;
+  transition:opacity .3s var(--ease-card);
+  cursor:zoom-out;
+}
+.plano-visor.is-open{ opacity:1; }
+.plano-visor[hidden]{ display:none; }
+.plano-visor-fig{
+  margin:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  max-width:90vw; max-height:90vh;
+  transform:translateY(8px) scale(.96);
+  transition:transform .35s var(--ease-card);
+}
+.plano-visor.is-open .plano-visor-fig{ transform:none; }
+.plano-visor-img{
+  display:block;
+  max-width:90vw;
+  max-height:calc(90vh - 52px);   /* deja espacio al nombre: todo cabe en el 90 % */
+  width:auto; height:auto;
+  object-fit:contain;
+  border-radius:10px;
+  box-shadow:0 24px 60px rgba(0,0,0,.45);
+  cursor:default;
+  background:rgba(255,255,255,.04);
+}
+.plano-visor-nombre{
+  margin-top:14px;
+  font-family:var(--display); font-weight:600; font-size:1.1rem; letter-spacing:-0.01em;
+  color:#fff; text-align:center; cursor:default;
+}
+.plano-visor-close{
+  position:absolute; top:max(16px, env(safe-area-inset-top)); right:16px;
+  width:44px; height:44px; border-radius:50%; border:0;
+  background:rgba(255,255,255,.14); color:#fff;
+  font-size:1.6rem; line-height:1; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:background .2s ease;
+}
+.plano-visor-close:hover{ background:rgba(255,255,255,.26); }
+.plano-visor-close:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+@media (prefers-reduced-motion: reduce){
+  .plano-visor-fig, .plano-card-zoom img{ transform:none !important; }
+}
+
 /* ---------- Franja de datos: aparición escalonada (500 ms, 120 ms entre bloques) ---------- */
 .databar.anim-ready .databar-item{
   opacity:0;
